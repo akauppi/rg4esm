@@ -535,7 +535,7 @@ For calls, you can use the `rg4js` plunge, as described above. For options, plea
 |---|---|
 |**Options**|
 |`allowInsecureSubmissions`|IE specific (n/a)|
-|`ignoreAjax{Abort|Error}`|Caught (`false`) by default. What is the use case for wanting to ignore them? We'll be happy to have these as options, if there is a need.|
+|`ignoreAjax{Abort\|Error}`|Caught (`false`) by default. What is the use case for wanting to ignore them? We'll be happy to have these as options, if there is a need.|
 |`disableAnonymousUserTracking`|(#1)|
 |`disableErrorTracking`|always enabled|
 |`disablePulse`|Real User Monitoring: always enabled|
@@ -547,7 +547,7 @@ For calls, you can use the `rg4js` plunge, as described above. For options, plea
 |`saveIfOffline`|We want to be offline savvy, always. `true` by default (`false` in Plain API). No need to switch it off.|
 |`pulseIgnoreUrlCasing`|Not sure it's needed|
 |`wrapAsynchronousCallbacks`|Author does not understand the purpose of it - after reading the docs. (#2)|
-|
+||
 |**Calls**|
 |`rg4js('setFilterScope', ...)`|Use case?|
 |`rg4js('noConflict', true)`|not necessary|
