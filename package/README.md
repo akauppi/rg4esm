@@ -532,7 +532,7 @@ Here are the options/calls that the ESM wrapper does not currently implement. So
 For calls, you can use the `rg4js` plunge, as described above. For options, please file an Issue/PR.
 
 ||reason for leaving out|
-|---|---|---|
+|---|---|
 |**Options**|
 |`allowInsecureSubmissions`|IE specific (n/a)|
 |`ignoreAjax{Abort|Error}`|Caught (`false`) by default. What is the use case for wanting to ignore them? We'll be happy to have these as options, if there is a need.|
