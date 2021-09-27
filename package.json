@@ -1,0 +1,16 @@
+{
+  "name": "@local/root",
+  "description": "Raygun JS client for ESM-capable browsers (build and demo)",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">= 16"
+  },
+  "scripts": {
+    "build": "npm --prefix package run build",
+    "dev": "(cd demo && npm run dev)",
+    "-- ": "",
+    "preinstall": "npm --prefix package install"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "raygun4js-esm",
+  "version": "0.0.0-alpha.0",
+  "description": "Raygun.com plugin for JavaScript /ESM capable browsers",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akauppi/raygun4js-esm.git",
+    "directory": "package"
+  },
+  "type": "module",
+  "author": {
+    "name": "Asko K.",
+    "email": "akauppi@gmail.com"
+  },
+  "keywords": [
+    "tracking",
+    "raygun",
+    "monitoring"
+  ],
+  "files": [
+    "src/**",
+    "package.json"
+  ],
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "tag": "alpha"
+  },
+  "dependencies": {
+    "raygun4js": "^2.22.5"
+  }
+}
