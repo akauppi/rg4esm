@@ -8,11 +8,12 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "dev": "npm run -s _checkEnv && concurrently -k -n watch,serve \"npm run -s _dev_watch\" \"npm run -s _dev_serve\"",
+    "dev": "concurrently -k -n watch,serve \"npm run -s _dev_watch\" \"npm run -s _dev_serve\"",
+    "//dev": "npm run -s _checkEnv && concurrently -k -n watch,serve \"npm run -s _dev_watch\" \"npm run -s _dev_serve\"",
     "_dev_watch": "rollup -w -c",
     "_dev_serve": "serve -n dist",
     "-- ": "",
-    "_checkEnv": "[ ! -z $RAYGUN_API_KEY ] || ( >&2 echo \"ERROR: Please provide 'RAYGUN_API_KEY' env.var\n\"; false)"
+    "//_checkEnv": "[ ! -z $RAYGUN_API_KEY ] || ( >&2 echo \"ERROR: Please provide 'RAYGUN_API_KEY' env.var\n\"; false)"
   },
   "dependencies": {
     "@local/rg4esm": "file:../package",
@@ -22,18 +23,18 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.0.5",
     "@rollup/plugin-replace": "^3.0.0",
-    "concurrently": "^6.2.1",
+    "concurrently": "^6.2.2",
     "rollup": "^2.57.0",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-svelte": "^7.1.0",
     "serve": "^12.0.1",
-    "svelte": "^3.43.0"
+    "svelte": "^3.43.0",
+    "sveltestrap": "^5.6.3"
   },
   "//devDependencies": {
     "//@rollup/plugin-commonjs": "^19.0.0"
   },
   "//": {
-    "scripts": {
-    }
+    "scripts": {}
   }
 }

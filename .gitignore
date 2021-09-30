@@ -1,5 +1,8 @@
 /**/node_modules/
-/**/dist/
+
+# Note: Important to have '/*' so exclusion can work
+/**/dist/*
+!/**/dist/index.html
 
 # semi-secret
 #/.env.local

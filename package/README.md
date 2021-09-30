@@ -64,8 +64,6 @@ These events are collected automatically:
 - clicks
 
 <!-- tbd. what does "navigation events" and "clicks" mean?
-
-- [ ] are SPA page changes included?
 -->
 
 In addition, your code can provide custom breadcrumb data.
@@ -144,18 +142,21 @@ Both Error Monitoring & Crash Reporting and Real User Monitoring output can be f
 	
 **5. Current page**
 
+	<!-- tbd. IF WE CAN DO THIS AUTOMATICALLY, MOVE TO UNDER 3. -->
+
+	>Note: We're checking if this can be gathered automatically.
+	
    Collection of this data happens by adding a few lines in the Router. See [`trackEvent.pageView`](#trackEvent_pageView).
 
    <!-- tbd. check the 2 links, above (in GitHub/npmjs.com) -->
-
-	<!-- tbd. Is 'current page' usable in RUM filtering? Docs say "URL" is.
-	-->
+	<!-- tbd. Is 'current page' usable in RUM filtering? Docs say "URL" is. -->
 	
-	<!-- tbd. IF WE CAN DO THIS AUTOMATICALLY, MOVE TO UNDER 3. -->
-
 **6. Custom tags**
 
-   You can add tags (strings, numbers) to your application. These are attached to errors and can be used for filtering.
+   You can add tags to your application. These are strings attached to errors and can be used for filtering.
+   
+   <!-- tbd. RG feature request. Why wouldn't tags be able to carry data? (and be filterable). E.g. "version" could be handled, this way.
+   -->
 
 <!-- tbd. Can tags/custom data be changed, during app lifespan, or are they constant? (in this client). Write something about that? -->
 
@@ -199,9 +200,8 @@ import { init } from "rg4esm"
 ```
 
 ```
-init( {
-  // application context
-  apiKey: string,
+init( apiKey: string, {
+  // context
   version: string,
   tags: Array of string,
 
@@ -215,19 +215,16 @@ init( {
   // Real User Monitoring
   pulseMaxVirtualPageDuration: /\d+\s*(?:ms|s|min)/,
   pulseIgnoreUrlCasing: boolean,
-} )
+}? )
 ```
 
-<!-- hidden note
-Some of the options map to Plain API options; some are presented as mutable calls in the Plain API but make sense (to the author) only as one-time settings. Thus they are brought here (eg. version).
--->
+>💊 API deviations: API key is provided with the `init` call (separate call in plain API). Also other Plain API calls have been brought to be options (i.e. we don't anticipate them to be changed during the web app instance's lifespan). Breadcrumb options have been merged together (separate `disableAutoBreadCrumbs[...]` calls in Plain API). Some options have been omitted (see "Trash" section, at the end). 
 
->💊 API deviations: API key is provided as an option (call in Plain API). Also other Plain API calls have been brought to be const-like options (i.e. we don't anticipate them to be changed during the web app instance's lifespan). Breadcrumb options have been merged together (separate `disableAutoBreadCrumbs[...]` calls in Plain API). Tags are presentable (only) as options (`tags`); in plain API they are calls (`withTags`). Some options have been omitted (see "Trash" section, at the end). 
-
-<!-- 
+<!-- tbd.
 For some options, this client uses a narrower (better defined?) type description than the Plain API.
 
-- tbd. Be more precise.
+- tags are strings, not numbers (irrelevant?)
+- custom data typing is not well defined in Plain API. But we omit it completely, for now.
 -->
 
 #### Context
@@ -257,11 +254,10 @@ Version provides metadata to errors shipped to Raygun.
 
 |key|value|sample|default|
 |---|---|---|---|
-|`enableBreadcrumbs`|`string containing 0..n of (may be delimited by space or comma): "console"|"navigation"|"clicks"|"network" | boolean`|`"console+navigation"`|`true` (all enabled)|
-
-Use this to disable some kinds of automatic breadcrumb collection.
+|`enableBreadcrumbs`|`{ "console"|"navigation"|"clicks"|"network": true|"full" }|boolean`|`"{ console: true }"`|`true` (all enabled)|
 
 <!-- tbd. Is this necessary?? -->
+Use this to disable some kind of automatic breadcrumb collection.
 
 |key|value|sample|default|comment|
 |---|---|---|---|---|
@@ -434,10 +430,8 @@ recordBreadcrumb( message: string,
 )
 ```
 
-Defalt level is `info`.
+Default level is `info`.
 
-<!-- tbd. what is the `location` used for?  
--->
 <!-- tbd. allowed types for `metadata`? Where do they show? #test all
 -->
 
@@ -558,10 +552,6 @@ For calls, you can use the `rg4js` plunge, as described above. For options, plea
 |`rg4js('setAutoBreadcrumbsXHRIgnoredHosts', ['hostname'])`||
 |`rg4js('setBreadcrumbLevel', ['info'])`|could be necessary (as an option), but the name should reflect that this filters the breadcrumbs sent out (instead of chaning their default level when recorded); `setBreadcrumbLimit` or `shipBreadcrumbLevel`?|
 |`rg4js('groupingKey', groupingKeyCallback)`|Can be useful (as an option)|
-
-<!-- tbd. implement in the `enableBreadcrumbs`
-|`rg4js('logContentsOfXhrCalls', true)`|could be useful (as an option); we avoid saying "xhr" in the API so maybe merge this with `"network"` breadcrumbs collection so it's `network[:headers]`, `network:full`?|
--->
 
 <!--
 |`rg4js('getRaygunInstance')`|not necessary|

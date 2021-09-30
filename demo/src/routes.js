@@ -1,15 +1,10 @@
-//
-// routes.js
-//
-import Home from './pages/Home.svelte'
-import Name from './pages/Name.svelte'
-import Wild from './pages/Wild.svelte'
-import NotFound from './pages/NotFound.svelte'
+/*
+* src/routes.js
+*/
+import Page1 from './pages/1.svelte'
+import Page2 from './pages/2.svelte'
 
 export default {
-  '/main': Main,    // with Error button, login screen
-  '/tab2': Tab2     // secondary
-
-  // Catch-all, must be last
-  '*': NotFound
+  '/': Page1,
+  '/2': Page2    // secondary
 }

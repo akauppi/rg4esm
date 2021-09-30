@@ -50,13 +50,21 @@ const rg = window.Raygun;
 
 import { rg4js } from '../lib/raygun.esm'
 
-const rgF = (name) => () => rg4js(name, ...arguments)
+const rgGen = (name) => (...args) => { rg4js(name, ...args); }
 
-const rgSetUser = rgF('setUser');
-const rgTrackEvent = rgF('trackEvent');
+const rgSetUser = rgGen('setUser');
+const rgTrackEvent = rgGen('trackEvent');
+const rgRecordBreadcrumb = rgGen('recordBreadcrumb');
 
-function init(opt) {
-  const { apiKey } = opt; apiKey || fail("Missing '.apiKey' option");
+/*
+* Initialize the client.
+*
+* tbd. Because when this happens, we can expect connection to be online (the web app has just loaded). But then again,
+*   web apps can be installed and launched offline. We need a mechanism (a callback that would be called if the API key
+*   turns out to be bad). Or just 'alert' from the client - that works, too.
+*/
+function init(apiKey, opt = {}, { _debugMode } = {}) {    // (string, { ...opt }?) => ()    ; last parameter is undocumented
+  apiKey || fail("Missing API key");
 
   rg4js('apiKey', apiKey);
   rg4js('enableCrashReporting', true);
@@ -65,6 +73,11 @@ function init(opt) {
 
   const plainOpts = {
     automaticPerformanceCustomTimings: true,    // 'performance.measure'
+    debugMode: !!_debugMode,
+
+    // These are "enabled by default" in the plain client. Here for completeness.
+    trackCoreWebVitals: true,
+    trackViewportDimensions: true
   };
 
   const handle = {
@@ -72,47 +85,72 @@ function init(opt) {
       rg4js('setVersion',v);
     },
 
-    withTags(v) {   // (Array of string) => ()
+    tags(v) {   // (Array of string) => ()
       rg4js('withTags', v);
     },
 
-    /*** not revealed
-    // Note: These *not* usable for filtering, and there may be reason to have them change, during session (i.e.
-    //    provide a generator function, here?
-    //
-    withCustomData(v) {   // ({ ... }) => ()      // tbd. types
-      rg4js('withCustomData', v);
-    },
-    ***/
+    /*
+    * v: {
+    *   console: true|false,
+    *   navigation: true|false,
+    *   clicks: true|false,
+    *   network: true|false|"full"    // "full" also ships contents
+    * } | boolean
+    *
+    *   true (default) means:
+    *     - all types; light network logging (no contents)
+    */
+    enableBreadcrumbs(v) {  // ( { <key>: boolean|"full" } | boolean) => ()
+      const validKeys = ["console", "navigation", "clicks", "network"]
 
-    collectBreadcrumbs(v) { // ({ console|navigation|clicks|network: boolean } | boolean) => ()
+      if (v === true) {
+        v = { console: true, navigation: true, clicks: true, network: true }
+      } else if (v === false) {
+        v = {}
+      } else if (typeof v === 'object') {
+        const badKeys = Object.keys(v).filter( k => !validKeys.contains(k) );
 
-      const fGen = (name) => `${b ? 'enable':'disable' }AutoBreadcrumbs${ name }`;
-      const m = new Map( Object.entries({
-        console:    fGen('Console'),
-        navigation: fGen('Navigation'),
-        clicks:     fGen('Clicks'),
-        network:    fGen('XHR')
-      }))
-      const validKeys = m.keys();
-
-      if (typeof v === 'boolean') v = Object.fromEntries( validKeys.map( k => [k,v] ) );
-
-      typeof v === 'object' || fail(`Unexpected value for '.collectBreadcrumbs' (expected 'object' or 'boolean'): ${v}`);
-
-      const bad = Object.keys(v).filter( x => validKeys.find(x) < 0 );
-      if (bad.length) {
-        throw new Error(`Unexpected breadcrumb type(s): ${ bad.join(', ') }`)
+        if (badKeys.length) { fail(`Unexpected key(s): ${ badKeys.join(", ") }`) }
+      } else {
+        fail(`Unexpected value for '.enableBreadcrumbs' (expected 'object' or 'boolean'): ${v}`);
       }
 
-      m.forEach( ([k,f]) => {
-        f(v[k]);
-      })
+      const nameGen = (name, b) => `${b ? 'enable':'disable' }AutoBreadcrumbs${ name }`;
+      const pairs = [
+        ['Console', v.console],
+        ['Navigation', v.navigation],
+        ['Clicks', v.clicks],
+        ['XHR', v.network]
+      ];
+      pairs.forEach( ([k,b]) => { rg4js( nameGen(name,b) ) } );
+
+      rg4js('logContentsOfXhrCalls', v.network === "full");   // collect network contents
     },
 
-    ignore3rdPartyErrors(v) {   // (boolean) => ()
-      plainOpts['ignore3rdPartyErrors'] = v;
-    },
+    // Note:
+    //  'ignore3rdPartyErrors' is a misleading name, since errors within 3rd party libraries _called from the app_
+    //    are still caught (and good so). This "ignores any errors that have no stack trace information".
+    //
+    //    - [ ] Be more precise, what this actually disables
+    //    - [ ] Is it connected with 'whitelistCrossOriginDomains', in any way?
+    //
+    /* tbd. combine these to 'enable3rdPartyErrors':
+rg4js('options', { ignore3rdPartyErrors: true });
+rg4js('whitelistCrossOriginDomains', ['code.jquery.com']);
+     */
+    /*** CONSTRUCTION
+    enable3rdPartyErrors(v) {   // (Array of string | true) => ()
+
+      if (v === boolean) {
+        plainOpts['ignore3rdPartyErrors'] = !v;
+        whiteList = [];
+      } else if (Array.isArray(v)) {
+        whiteList = v;
+      } else {
+        fail(`Expected Array of string or boolean, got: ${v}`)
+      }
+    },***/
+
     excludedHostnames(v) {      // (Array of string) => ()
       plainOpts['excludeHostnames'] = v;
     },
@@ -157,6 +195,10 @@ function init(opt) {
   }
 
   rg4js('options', plainOpts);
+
+  // tbd. how to see that 'options' (and other rg4js calls) succeed?
+
+  trackPageChanges();
 }
 
 /*
@@ -178,12 +220,36 @@ function setUser(uid, opt) {  // (string|null, { email: string, firstName: strin
   }
 }
 
-/*
+/* REMOVE?
 * Inform change of current page, to Raygun.
-*/
+*_/
 function setPage(path) {  // (string) => ()
 
   rgTrackEvent({ type: 'pageView', path });
+}
+***/
+
+/*
+* Track page changes.
+*
+* Since this is possible, the API doesn't need 'setPage'.
+*/
+function trackPageChanges() {
+
+  // tbd. Make sure all kinds of URL changes are detected.
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onhashchange
+  //
+  window.addEventListener("hashchange", (ev) => {
+
+    console.debug("Hash change detected:", ev);
+      //
+      // ev.newURL: 'http://localhost:5000/#/abc'
+
+    const path = ev.newURL;
+    rgTrackEvent({ type: 'pageView', path });
+
+  }, false);
 }
 
 /*
@@ -211,11 +277,11 @@ function fail(msg) { throw new Error(msg) }
 export {
   init,
   setUser,
-  setPage
+  recordBreadcrumb
 }
 
 
 /***
  _setCookieAsSecure = true,   // if no localstorage, no sessionstorage, only use cookies for 'https'
 
- */
+*/
