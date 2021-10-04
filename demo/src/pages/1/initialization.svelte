@@ -1,5 +1,5 @@
 <!--
-- src/pages/1/0-initialization.svelte
+- src/pages/1/initialization.svelte
 -
 - Details for the initialization step.
 -->
@@ -8,10 +8,12 @@
   <!-- tbd. use CSS grid (native, not with Sveltestrap)
   -->
   <Row>
+    <!-- remove
     <Col md="3">
       <Label for="I_apiKey" size="sm">Raygun API key</Label>
       <Input type="text" id="I_apiKey" bind:value={apiKey} placeholder="enter" style="font-family: monospace" />
     </Col>
+    -->
     <Col md="1">
       <Label for="I_ver" size="sm">Version</Label>
       <Input type="text" id="I_ver" bind:value={version} placeholder="0.0.0" />
@@ -19,10 +21,11 @@
     <!-- tbd. How to apply styles to Sveltestrap components from 'style', not inline? #help
     - (ah, they may not have been designed for external styling...)
     -->
-    <Col md="4">
+    <Col md="3">
       <Label for="I_tags" size="sm">Tags</Label>
       <Input type="text" id="I_tags" bind:value={tags} placeholder="swan,wolf,giraffe" />
     </Col>
+
   </Row>
 
   <Row style="margin-top: 1em;">
@@ -49,15 +52,18 @@
   </Row>
 </Form>
 
+<!-- tbd. move to '1'
+-->
 {#if initialized === true}
-  <p transition:fade style="margin-top: 1em;">
-    The Raygun client is now initialized.
+  <div transition:fade style="margin-top: 1em;">
+    <p>The Raygun client is now initialized.
 
-    The context provided above (alongside automatically gathered context like browser type) is shipped to Raygun
-    server with each caught Error or Real User Monitoring message.
+    The context provided above (alongside automatically gathered context) is shipped to Raygun
+      server with each caught Error or Real User Monitoring payload.</p>
 
-    Next, we'll send an <tt>Error</tt> to see they get through.
-  </p>
+    <p>Next, we'll send an <tt>Error</tt> to see they really get through.
+    </p>
+  </div>
 {/if}
 
 <style>
@@ -73,9 +79,8 @@
   import { init } from '@local/rg4esm'
   import { writable } from 'svelte/store'
   import { fade } from 'svelte/transition'
-  import { validateApiKey } from '../../tools/api'
 
-  let apiKey = import.meta.env.RAYGUN_API_KEY;
+  const apiKey = import.meta.env.RAYGUN_API_KEY;
   let version = '';
   let tags = '';
 
@@ -94,22 +99,22 @@
 
     console.debug("Initializing...");
 
-    init( apiKey, {    // synchronous; no return code
-      version,
-      tags: tagsStr
-    });
+    try {
+      init(apiKey, {    // synchronous; no return code
+        version,
+        tags: tagsStr
+      });
+      $store = true;
 
-    // Check whether the API key is valid (updates the UI)
-    //
-    validateApiKey(apiKey)
-      .then( isValid => {
-        if (isValid) $store = true;
-        else $store = "API key is invalid"
-      })
-      .catch(err => {
-        $store = err.message;
-      })
+    } catch(err) {
+      $store = err.message;
+    }
   }
 
   function fail(msg) { throw new Error(msg) }
+
+  export {
+    version,
+    tags
+  }
 </script>

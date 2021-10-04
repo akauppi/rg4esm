@@ -1,5 +1,12 @@
 <!--
-- src/pages/1.svelte
+- src/pages/1/index.svelte
+-
+- tbd. The version, tags sharing should really be made so that:
+-   - we carry the values
+-   - allow 'Part_Initialization' to edit them
+-   - share to other components
+-
+-   - ( ) Same for 'initialized'. This allows us to lift the "after init pressed" text and logic here.
 -->
 
 <h1>RG/ESM integration demo</h1>
@@ -17,66 +24,24 @@
     <p>
       Initialization must be done once. It selects the Raygun project ("app") and provides context for the user session.
     </p>
-
-    <Part_Initialization>
-    </Part_Initialization>
-
+    <Part_Initialization bind:version={initVersion} bind:tags={initTags} />
   </AccordionItem>
 
-
-  <!--
-  <_!-- tbd. enable only when initialized; add 'active' (here!) when initialized
-  --_>
   <AccordionItem header="Error Monitoring & Crash Reporting">
-
     <p>
       Now, let's send an <tt>Error</tt> and see what gets reported.
     </p>
-
-    <Button primary onClick={ sendError }>Send an Error</Button>
-
-    <p> <_!-- tbd. enable after the 'sendError' pressed --_>
-      Please visit the Raygun console and see that these information got reported:
-
-      - <CheckBox>Version: { contextVersion }</CheckBox>
-      - <CheckBox>Tags: { contextTags }</CheckBox>
-      - <CheckBox>Breadcrumbs:</CheckBox>
-        - <CheckBox>console logging</CheckBox>
-        - <CheckBox>network requests</CheckBox>
-        - <CheckBox>navigation (page change)</CheckBox>
-        - <CheckBox>"clicks"</CheckBox>
-      - <CheckBox>Browser type, version</CheckBox>
-      - <CheckBox>Country code</CheckBox>
-      - <CheckBox>...What else???</CheckBox>
-
-      Proceed to next step if these were shipped.
-    </p>
+    <Part_SendError initVersion={initVersion} initTags={initTags} />
   </AccordionItem>
 
   <AccordionItem header="Current User">
     <p>
-      Raygun needs to be explicitly told about a current user. Do it here - this is of course just a fake authentication.
+      Now, let's send an <tt>Error</tt> and see what gets reported.
     </p>
-
-    <input type="text" placeholder="fake-id" value:bind={ fakeId }/>
-
-    <p>
-      Then send an `Error`.
-    </p>
-
-    <Button primary onClick={ sendError }>Send an Error</Button>
-
-    <p>
-      Visit the Raygun dashboard to see the error.
-
-      - <CheckBox>An error with `uid` "{ fakeId }" was seen</CheckBox>
-    </p>
-
-    <p>
-      Next, let's check that SPA page information gets included the same way.
-    </p>
+    <Part_SetUser />
   </AccordionItem>
 
+  <!--
   <AccordionItem>
     <p>
       The client should automatically record the URL of the page. To test this, please <a href="/#/2">move to a 2nd page</a>
@@ -142,13 +107,22 @@
 <script>
   import { Accordion, AccordionItem, Button, Icon } from "sveltestrap"
 
-  import Part_Initialization from './1/0-initialization.svelte'
-
-  import { /*_send, setUser*/ } from '@local/rg4esm'
+  import Part_Initialization from './initialization.svelte'
+  import Part_SendError from './send-error.svelte'
+  import Part_SetUser from './set-user.svelte'
+  //import Part_PageChange from './page-change.svelte'
 
   let fakeId;
 
-  function sendError() {
-    //_send( new Error("This is a DRILL. This is a DRILL.") )
-  }
+  let initVersion, initTags;    // values provided in init page (available for other components)
+
+  /*
+  * Debugging help
+  */
+  import { init } from '@local/rg4esm'
+  const apiKey = import.meta.env.RAYGUN_API_KEY;
+  init(apiKey, {
+    version: "1.2.3",
+    tags: ["a","b"]
+  })
 </script>

@@ -55,6 +55,12 @@
   </style>
 </svelte:head>
 
+<style>
+  :global(.tt) {
+    font-family: monospace;
+  }
+</style>
+
 <script>
   import Router from 'svelte-spa-router'
   import routes from './routes'

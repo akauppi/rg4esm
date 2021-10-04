@@ -1,7 +1,7 @@
 /*
 * src/routes.js
 */
-import Page1 from './pages/1.svelte'
+import Page1 from './pages/1/index.svelte'
 import Page2 from './pages/2.svelte'
 
 export default {

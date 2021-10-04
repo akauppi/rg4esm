@@ -1,6 +1,15 @@
+#!/usr/bin/env node
+
 /*
-* Direct access to Raygun server REST API.
+* Check that the provided Raygun API key is valid.
+*
+* Usage:
+*   <<
+*     check-api-key.js <api-key>
+*   <<
 */
+import fetch from 'node-fetch'
+
 const baseUrl = "https://api.raygun.com"
 
 /*
@@ -33,6 +42,19 @@ async function validateApiKey(apiKey) {   // (string) => Promise of boolean
   }
 }
 
-export {
-  validateApiKey
+//--- CLI
+
+const [apiKey] = process.argv.slice(2);
+
+if (!apiKey) {
+  process.stderr.write("\nUsage: check-api-key.js {raygun-api-key}\n");
+  process.exit(1);
 }
+
+await validateApiKey(apiKey)
+  .then( isValid => {
+    process.exit( isValid ? 0:1 );
+  }).catch( err => {
+    process.stderr.write(`\nERROR: ${err.message}\n`);
+    process.exit(2);
+  });

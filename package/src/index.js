@@ -52,6 +52,7 @@ import { rg4js } from '../lib/raygun.esm'
 
 const rgGen = (name) => (...args) => { rg4js(name, ...args); }
 
+const rgSend = rgGen('send');
 const rgSetUser = rgGen('setUser');
 const rgTrackEvent = rgGen('trackEvent');
 const rgRecordBreadcrumb = rgGen('recordBreadcrumb');
@@ -211,7 +212,10 @@ rg4js('whitelistCrossOriginDomains', ['code.jquery.com']);
 function setUser(uid, opt) {  // (string|null, { email: string, firstName: string?, fullName: string? }?) => ()
 
   if (!uid) {
+    rg4js('endSession');
+      // "This will end the session for a user and start a new one. The new session will remain attached to the current user."
     rgSetUser(null);
+
   } else {
     const { email, firstName, fullName } = opt || {};
     const isAnon = !(email || firstName || fullName);
@@ -272,16 +276,25 @@ function recordBreadcrumb( msg, metadata, opts) {   // (string, object|..., { le
   });
 }
 
+/*
+* Explicitly send an error
+*/
+function _send(error) {   // (Error) => ()
+  assume(error instanceof Error);
+
+  rgSend(error);
+}
+
+function assume(cond) {
+  if (!cond) throw new Error("Type assumption failed (stack trace for details)");
+}
+
 function fail(msg) { throw new Error(msg) }
 
 export {
   init,
   setUser,
-  recordBreadcrumb
+  recordBreadcrumb,
+    //
+  _send
 }
-
-
-/***
- _setCookieAsSecure = true,   // if no localstorage, no sessionstorage, only use cookies for 'https'
-
-*/

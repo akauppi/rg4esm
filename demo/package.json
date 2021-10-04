@@ -6,14 +6,18 @@
   "engines": {
     "node": ">= 16"
   },
+  "bin": {
+    "checkApiKey": "./tools/check-api-key.js"
+  },
   "scripts": {
     "build": "rollup -c",
-    "dev": "concurrently -k -n watch,serve \"npm run -s _dev_watch\" \"npm run -s _dev_serve\"",
-    "//dev": "npm run -s _checkEnv && concurrently -k -n watch,serve \"npm run -s _dev_watch\" \"npm run -s _dev_serve\"",
+    "dev": "npm run -s _checkApiKey && concurrently -k -n watch,serve \"npm run -s _dev_watch\" \"npm run -s _dev_serve\"",
     "_dev_watch": "rollup -w -c",
     "_dev_serve": "serve -n dist",
     "-- ": "",
-    "//_checkEnv": "[ ! -z $RAYGUN_API_KEY ] || ( >&2 echo \"ERROR: Please provide 'RAYGUN_API_KEY' env.var\n\"; false)"
+    "_checkApiKey": "npm run -s _checkApiKey1 && npm run -s _checkApiKey2",
+    "_checkApiKey1": "[ ! -z $RAYGUN_API_KEY ] || ( >&2 echo \"ERROR: Please provide 'RAYGUN_API_KEY' env.var\n\"; false)",
+    "_checkApiKey2": "checkApiKey $RAYGUN_API_KEY || ( >&2 echo \"ERROR: API key '${RAYGUN_API_KEY}' was not accepted by Raygun servers.\n\"; false)"
   },
   "dependencies": {
     "@local/rg4esm": "file:../package",
@@ -21,9 +25,11 @@
     "svelte-spa-router": "^3.2.0"
   },
   "devDependencies": {
+    "@local/self": "file:.",
     "@rollup/plugin-node-resolve": "^13.0.5",
     "@rollup/plugin-replace": "^3.0.0",
     "concurrently": "^6.2.2",
+    "node-fetch": "^3.0.0",
     "rollup": "^2.57.0",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-svelte": "^7.1.0",

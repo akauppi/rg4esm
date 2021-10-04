@@ -540,7 +540,7 @@ For calls, you can use the `rg4js` plunge, as described above. For options, plea
 |`setCookieAsSecure`|n/a, since all browsers [support localstorage](https://caniuse.com/?search=localstorage)|
 |`saveIfOffline`|We want to be offline savvy, always. `true` by default (`false` in Plain API). No need to switch it off.|
 |`pulseIgnoreUrlCasing`|Not sure it's needed|
-|`wrapAsynchronousCallbacks`|Author does not understand the purpose of it - after reading the docs. (#2)|
+|`wrapAsynchronousCallbacks`|Author does not understand the purpose of it - after reading the docs. Four times. (#2)|
 ||
 |**Calls**|
 |`rg4js('setFilterScope', ...)`|Use case?|
