@@ -7,10 +7,16 @@
   "engines": {
     "node": ">= 16"
   },
+  "devDependencies": {
+    "@local/package": "file:./package",
+    "jest": "^27.3.1"
+  },
   "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config test/jest.config.js --verbose --detectOpenHandles --all",
+    "-- ": "",
     "build": "npm --prefix package run build",
     "dev": "(cd demo && npm run dev)",
-    "-- ": "",
+    "-- -": "",
     "preinstall": "npm --prefix package install"
   }
 }

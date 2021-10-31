@@ -56,6 +56,7 @@ const rgSend = rgGen('send');
 const rgSetUser = rgGen('setUser');
 const rgTrackEvent = rgGen('trackEvent');
 const rgRecordBreadcrumb = rgGen('recordBreadcrumb');
+const rgWithCustomData = rgGen('withCustomData');
 
 /*
 * Initialize the client.
@@ -205,23 +206,61 @@ rg4js('whitelistCrossOriginDomains', ['code.jquery.com']);
 /*
 * Inform change of logged in user, to Raygun.
 *
-* 'setUser(null)'   no active user (logged out)
-* 'setUser(id)'     anonymous user (or email and name must be fetched from the auth service, ie. Raygun doesn't have them)
-* 'setUser(id, { email: string, firstName: string, fullName: string })  reveal info to Raygun
+* 'setUser(null)'   # no active user (logged out)
+* 'setUser(id)'     # anonymous user (Raygun is not given the email and name of the user)
+* 'setUser(id, { email: string, firstName: string, fullName: string })  # reveal info to Raygun
+*
+* Note:
+*   Raygun's concept of "anonymous user" means the same as "guest user" in Firebase. Let's clarify.
+*
+*                                                                     Firebase term     Raygun term
+*   ---                                                               -------------     -----------
+*   no information of a visitor                                     | guest user      | anonymous user |
+*   explicit user id provided but no name, email details            | anonymous user  | user |
+*   explicit user id and email|name (any or all of them) provided   | user            | user |
+*
+* Note:
+*   Raygun updates an "anonymous" (guest) session to a proper session if 'setUser' is called. This means also the
+*   information preceding a login is seen in the Raygun dashboard as part of the logged in session.
 */
 function setUser(uid, opt) {  // (string|null, { email: string, firstName: string?, fullName: string? }?) => ()
 
   if (!uid) {
+    // Ending the session explicitly is needed.
+
+    // Q #raygun: what is the correct "we don't have a current user any more" signalling?
+    //  i.e.
+    //    - end the session
+    //    - _also_ change the user to "guest"
+
     rg4js('endSession');
       // "This will end the session for a user and start a new one. The new session will remain attached to the current user."
+
     rgSetUser(null);
 
   } else {
     const { email, firstName, fullName } = opt || {};
-    const isAnon = !(email || firstName || fullName);
+    //const isAnon = !(email || firstName || fullName);
 
-    rgSetUser(uid, isAnon, email, firstName, fullName, uid);
+    rgSetUser( {
+      identifier: uid,
+      isAnonymous: false,     // we want to see _our_ id in the dashboard, not Raygun's "anonymous user". Though this
+                              // user could be anonymous in the way that the web app only knows their user id, nothing
+                              // more.
+      email,
+      fullName,
+      firstName,
+
+      // uuid is "identifier of the device the app is running on."  We don't need it.
+      //
+      //uuid: // Windows-style UUID (universal unique identifier) identifying "the DEVICE the app is running on".
+    } );
   }
+
+  // Concept of user in Raygun is limited to Real User Monitoring (sessions etc.), but by adding a custom data to
+  // errors we can bring it to the Crash Reporting side, as well.
+  //
+  rgWithCustomData({ user: uid });    // overwrites earlier custom data context
 }
 
 /* REMOVE?

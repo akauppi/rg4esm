@@ -1,6 +1,8 @@
 # Raygun for ESM capable browsers
 
-A re-packaging of [Raygun4js](https://www.npmjs.com/package/raygun4js) intended for projects that use browser native ECMAScript Modules (ESM).
+A re-packaging of [`raygun4js`](https://www.npmjs.com/package/raygun4js) intended for projects that use browser native ECMAScript Modules (ESM).
+
+>Note: This repo refers to `raygun4js` as the "plain client/API".
 
 
 ## File system
@@ -14,9 +16,9 @@ A re-packaging of [Raygun4js](https://www.npmjs.com/package/raygun4js) intended 
 ## Requirements
 
 - `npm`
-- Raygun license 
+- Raygun license
 
-   Creating a dedicated app for trying this out is recommended. 
+   Creating a dedicated app in the Raygun console for trying this out is recommended. 
    
    >To just try out (without dashboard), you can provide a fake API key like `RAYGUN_API_KEY=x`.
 
@@ -32,9 +34,14 @@ $ RAYGUN_API_KEY=... npm run dev
 ...
 ```
 
-Open [localhost:5000](http://localhost:5000) and follow the 1..n path on manual tests.
+Open [localhost:5000](http://localhost:5000) and follow the instructions to exercise the client and confirm that data gets shipped to your Raygun app.
 
-Follow your Raygun application's dashboard to see what gets shipped.
+
+## Terminology
+
+|||
+|---|---|
+|app|Raygun calls a collection of data in the online dashboard an "app". This is more like a *project*, *tier* or *instance*.|
 
 
 ## References

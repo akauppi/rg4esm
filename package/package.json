@@ -1,12 +1,15 @@
 {
   "name": "raygun4js-esm",
-  "version": "0.0.0-alpha.0",
-  "description": "Raygun.com plugin for JavaScript /ESM capable browsers",
+  "version": "0.0.0-alpha.2",
+  "description": "Raygun client for ESM capable browsers",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/akauppi/raygun4js-esm.git",
+    "url": "https://github.com/akauppi/rg4es.git",
     "directory": "package"
+  },
+  "publishConfig": {
+    "tag": "alpha"
   },
   "type": "module",
   "author": {
@@ -20,16 +23,25 @@
   ],
   "files": [
     "src/**",
+    "lib/**",
     "package.json"
   ],
   "exports": {
     ".": "./src/index.js",
     "./package.json": "./package.json"
   },
-  "publishConfig": {
-    "tag": "alpha"
-  },
   "dependencies": {
     "raygun4js": "^2.22.5"
+  },
+  "scripts": {
+    "postinstall": "[ -f lib/raygun.esm.js ] || npm run -s _applyPatch",
+    "_applyPatch": "sh/patch.apply.sh"
+  },
+  "//": {
+    "scripts": {
+      "_applyPatch": [
+        ""
+      ]
+    }
   }
 }

@@ -1,38 +1,35 @@
+var windw = window || global;
+var originalOnError = windw.onerror;
+windw.onerror = function (msg, url, line, col, err) {
+  if (originalOnError) {
+    originalOnError(msg, url, line, col, err);
+  }
+
+  if (!err) {
+    err = new Error(msg);
+  }
+
+  windw['rg4js'].q = windw['rg4js'].q || [];
+  windw['rg4js'].q.push({e: err});
+};
+
+// Similar approach as the snippet, creates the rg4js proxy function, which is exported in umd.outro.js once the
+// script is executed, and later overwritten by the loader once it's finished
+(function(wind) { wind['RaygunObject'] = 'rg4js';
+  wind[wind['RaygunObject']] = wind[wind['RaygunObject']] || function() {
+    if (wind && typeof wind['Raygun'] === 'undefined' ||
+      (typeof document === 'undefined' || document.readyState !== 'complete')) {
+      // onload hasn't been called, cache the commands just like the snippet
+      (wind[wind['RaygunObject']].o = wind[wind['RaygunObject']].o || []).push(arguments)
+    } else {
+      // onload has been called and provider has executed, call the executor proxy function
+      wind[wind['RaygunObject']](arguments[0], arguments[1]);
+    }
+
+  }})(windw);
 /*! Raygun4js - v2.22.5 - 2021-08-18
 * https://github.com/MindscapeHQ/raygun4js
 * Copyright (c) 2021 MindscapeHQ; Licensed MIT */
-// https://github.com/umdjs/umd/blob/master/templates/returnExportsGlobal.js
-
-  var windw = window || global;
-  var originalOnError = windw.onerror;
-  windw.onerror = function (msg, url, line, col, err) {
-    if (originalOnError) {
-      originalOnError(msg, url, line, col, err);
-    }
-
-    if (!err) {
-      err = new Error(msg);
-    }
-
-    windw['rg4js'].q = windw['rg4js'].q || [];
-    windw['rg4js'].q.push({e: err});
-  };
-
-  // Similar approach as the snippet, creates the rg4js proxy function, which is exported in umd.outro.js once the
-  // script is executed, and later overwritten by the loader once it's finished
-  (function(wind) { wind['RaygunObject'] = 'rg4js';
-  wind[wind['RaygunObject']] = wind[wind['RaygunObject']] || function() {
-      if (wind && typeof wind['Raygun'] === 'undefined' ||
-        (typeof document === 'undefined' || document.readyState !== 'complete')) {
-        // onload hasn't been called, cache the commands just like the snippet
-        (wind[wind['RaygunObject']].o = wind[wind['RaygunObject']].o || []).push(arguments)
-      } else {
-        // onload has been called and provider has executed, call the executor proxy function
-        wind[wind['RaygunObject']](arguments[0], arguments[1]);
-      }
-
-  }})(windw);
-
 (function(window, undefined) {
 
 
@@ -1203,6 +1200,74 @@ window.TraceKit = TraceKit;
 
 }(window));
 
+(function traceKitAsyncForjQuery($, TraceKit) {
+  'use strict';
+  // quit if jQuery isn't on the page
+  if (!$ || !$.event || !$.event.add) {
+    return;
+  }
+
+  var _oldEventAdd = $.event.add;
+  $.event.add = function traceKitEventAdd(elem, types, handler, data, selector) {
+    if (typeof handler !== 'function' && typeof handler.handler !== 'function') {
+      return _oldEventAdd.call(this, elem, types, handler, data, selector);
+    }
+
+    var _handler;
+
+    if (handler.handler) {
+      _handler = handler.handler;
+      handler.handler = TraceKit.wrap(handler.handler);
+    } else {
+      _handler = handler;
+      handler = TraceKit.wrap(handler);
+    }
+
+    // If the handler we are attaching doesn’t have the same guid as
+    // the original, it will never be removed when someone tries to
+    // unbind the original function later. Technically as a result of
+    // this our guids are no longer globally unique, but whatever, that
+    // never hurt anybody RIGHT?!
+    if (_handler.guid) {
+      handler.guid = _handler.guid;
+    } else {
+      handler.guid = _handler.guid = $.guid++;
+    }
+
+    return _oldEventAdd.call(this, elem, types, handler, data, selector);
+  };
+
+  var _oldReady = $.fn.ready;
+  $.fn.ready = function traceKitjQueryReadyWrapper(fn) {
+    return _oldReady.call(this, TraceKit.wrap(fn));
+  };
+
+  var _oldAjax = $.ajax;
+  $.ajax = function traceKitAjaxWrapper(url, options) {
+    if (typeof url === "object") {
+      options = url;
+      url = undefined;
+    }
+
+    options = options || {};
+
+    var keys = ['complete', 'error', 'success'], key;
+    while(key = keys.pop()) {
+      if ($.isFunction(options[key])) {
+        options[key] = TraceKit.wrap(options[key]);
+      }
+    }
+
+    try {
+      return (url) ? _oldAjax.call(this, url, options) : _oldAjax.call(this, options);
+    } catch (e) {
+      TraceKit.report(e);
+      throw e;
+    }
+  };
+
+}(window.jQuery, window.TraceKit));
+
 // Mozilla's toISOString() shim for IE8
 if (!Date.prototype.toISOString) {
     (function () {
@@ -1450,74 +1515,6 @@ if (!Function.prototype.bind) {
   };
 })();
 
-
-(function traceKitAsyncForjQuery($, TraceKit) {
-  'use strict';
-  // quit if jQuery isn't on the page
-  if (!$ || !$.event || !$.event.add) {
-    return;
-  }
-
-  var _oldEventAdd = $.event.add;
-  $.event.add = function traceKitEventAdd(elem, types, handler, data, selector) {
-    if (typeof handler !== 'function' && typeof handler.handler !== 'function') {
-      return _oldEventAdd.call(this, elem, types, handler, data, selector);
-    }
-
-    var _handler;
-
-    if (handler.handler) {
-      _handler = handler.handler;
-      handler.handler = TraceKit.wrap(handler.handler);
-    } else {
-      _handler = handler;
-      handler = TraceKit.wrap(handler);
-    }
-
-    // If the handler we are attaching doesn’t have the same guid as
-    // the original, it will never be removed when someone tries to
-    // unbind the original function later. Technically as a result of
-    // this our guids are no longer globally unique, but whatever, that
-    // never hurt anybody RIGHT?!
-    if (_handler.guid) {
-      handler.guid = _handler.guid;
-    } else {
-      handler.guid = _handler.guid = $.guid++;
-    }
-
-    return _oldEventAdd.call(this, elem, types, handler, data, selector);
-  };
-
-  var _oldReady = $.fn.ready;
-  $.fn.ready = function traceKitjQueryReadyWrapper(fn) {
-    return _oldReady.call(this, TraceKit.wrap(fn));
-  };
-
-  var _oldAjax = $.ajax;
-  $.ajax = function traceKitAjaxWrapper(url, options) {
-    if (typeof url === "object") {
-      options = url;
-      url = undefined;
-    }
-
-    options = options || {};
-
-    var keys = ['complete', 'error', 'success'], key;
-    while(key = keys.pop()) {
-      if ($.isFunction(options[key])) {
-        options[key] = TraceKit.wrap(options[key]);
-      }
-    }
-
-    try {
-      return (url) ? _oldAjax.call(this, url, options) : _oldAjax.call(this, options);
-    } catch (e) {
-      TraceKit.report(e);
-      throw e;
-    }
-  };
-
-}(window.jQuery, window.TraceKit));
 
 /*globals __DEV__ */
 
@@ -2829,10 +2826,11 @@ var raygunFactory = function(window, $, undefined) {
   Raygun.CoreWebVitals = raygunCoreWebVitalFactory(window);
 
   // Constants
-  var ProviderStates = {
+  /*** REMOVED
+   var ProviderStates = {
     LOADING: 0,
     READY: 1,
-  };
+  }; ***/
 
   var _userKey = 'raygun4js-userid';
 
@@ -2870,7 +2868,7 @@ var raygunFactory = function(window, $, undefined) {
     _breadcrumbs = new Raygun.Breadcrumbs(),
     _pulseMaxVirtualPageDuration = null,
     _pulseIgnoreUrlCasing = true,
-    _providerState = ProviderStates.LOADING,
+    //_providerState = ProviderStates.LOADING,  // REMOVED
     _loadedFrom,
     _processExceptionQueue = [],
     _trackEventQueue = [],
@@ -3046,6 +3044,7 @@ var raygunFactory = function(window, $, undefined) {
       return Raygun;
     },
 
+    //*** REPLACE??
     send: function(ex, customData, tags) {
       if (_disableErrorTracking) {
         Raygun.Utilities.log('Error not sent due to disabled error tracking');
@@ -3074,7 +3073,7 @@ var raygunFactory = function(window, $, undefined) {
         }
       }
       return Raygun;
-    },
+    }, //***/
 
     setUser: function(user, isAnonymous, email, fullName, firstName, uuid) {
       _user = {
@@ -3171,10 +3170,10 @@ var raygunFactory = function(window, $, undefined) {
     },
 
     trackEvent: function(type, options) {
-      if (_providerState !== ProviderStates.READY) {
+      /*** REMOVED if (_providerState !== ProviderStates.READY) {
         _trackEventQueue.push({ type: type, options: options });
         return;
-      }
+      }***/
 
       if (Raygun.RealUserMonitoring !== undefined && _rum) {
         if (type === 'pageView' && options.path) {
@@ -3291,12 +3290,16 @@ var raygunFactory = function(window, $, undefined) {
   // The final initializing logic is provided as a callback due to async storage methods for user data in React Native
   // The common case executes it immediately due to that data being provided by the cookie synchronously
   // The case when Affected User Tracking is enabled calls this function when the code sets the user data
+  let bootRaygunCalled = false;
   function bootRaygun() {
-    if (_providerState === ProviderStates.READY) {
+    /*** REMOVED if (_providerState === ProviderStates.READY) {
       return;
     }
 
     _providerState = ProviderStates.READY;
+    ***/
+    (!bootRaygunCalled) || fail("'bootRaygun' called twice - what's up?");
+    bootRaygunCalled = true;
 
     if (Raygun.RealUserMonitoring !== undefined && !_disablePulse) {
       var startRum = function() {
@@ -3363,6 +3366,7 @@ var raygunFactory = function(window, $, undefined) {
     _trackEventQueue = [];
   }
 
+  /*** not used
   function offlineSave(url, data) {
     var dateTime = new Date().toJSON();
 
@@ -3381,7 +3385,7 @@ var raygunFactory = function(window, $, undefined) {
     } catch (e) {
       Raygun.Utilities.log('Raygun4JS: LocalStorage full, cannot save exception');
     }
-  }
+  }***/
 
   function sendSavedErrors() {
     if (Raygun.Utilities.localStorageAvailable()) {
@@ -3422,6 +3426,7 @@ var raygunFactory = function(window, $, undefined) {
     return value;
   }
 
+  /*** not used
   function filterObject(reference, parentKey) {
     if (reference == null) {
       return reference;
@@ -3455,7 +3460,7 @@ var raygunFactory = function(window, $, undefined) {
     }
 
     return filteredObject;
-  }
+  }***/
 
   function processJQueryAjaxError(event, jqXHR, ajaxSettings, thrownError) {
     var message =
@@ -3498,6 +3503,7 @@ var raygunFactory = function(window, $, undefined) {
     });
   }
 
+  /*** REPLACE
   function processException(stackTrace, options, userTriggered, error) {
     if (_providerState !== ProviderStates.READY) {
       _processExceptionQueue.push({
@@ -3814,7 +3820,9 @@ var raygunFactory = function(window, $, undefined) {
       sendToRaygun(payload);
     }
   }
+  ***/
 
+  /*** (only used by 'ProcessException()')
   function sendToRaygun(data) {
     if (!Raygun.Utilities.isApiKeyConfigured()) {
       return;
@@ -3824,7 +3832,9 @@ var raygunFactory = function(window, $, undefined) {
     var url = _raygunApiUrl + '/entries?apikey=' + encodeURIComponent(Raygun.Options._raygunApiKey);
     makePostCorsRequest(url, JSON.stringify(data));
   }
+  ***/
 
+  /*** 'makePostCorsRequest' REPLACED
   // Create the XHR object.
   function createCORSRequest(method, url) {
     var xhr;
@@ -3940,22 +3950,15 @@ var raygunFactory = function(window, $, undefined) {
 
     xhr.send(data);
   }
+  ***/
 
   // Storage
   function saveToStorage(value) {
-    if(Raygun.Utilities.localStorageAvailable()) {
-      localStorage.setItem(_userKey, value);
-    } else {
-      Raygun.Utilities.createCookie(_userKey, value, 24 * 31, _setCookieAsSecure);
-    }
+    localStorage.setItem(_userKey, value);
   }
 
   function clearStorage() {
-    if(Raygun.Utilities.localStorageAvailable()) {
-      localStorage.removeItem(_userKey);
-    } else {
-      Raygun.Utilities.clearCookie(_userKey);
-    }
+    localStorage.removeItem(_userKey);
   }
 
   function getFromStorage(callback) {
@@ -3963,27 +3966,7 @@ var raygunFactory = function(window, $, undefined) {
      * Attempt to get the value from local storage,
      * If that doesn't contain a value then try from a cookie as previous versions saved it here
      */
-    var value;
-    if(Raygun.Utilities.localStorageAvailable()) {
-      value = localStorage.getItem(_userKey);
-
-      if(value !== null) {
-        callback(value);
-        return;
-      }
-    }
-
-    value = Raygun.Utilities.readCookie(_userKey);
-
-    /**
-     * If there was a cookie and localStorage is avaliable then
-     * clear the cookie as localStorage will be the storage mechanism going forward
-     */
-    if(value !== null && Raygun.Utilities.localStorageAvailable()) {
-      Raygun.Utilities.clearCookie(_userKey);
-      localStorage.setItem(_userKey, value);
-    }
-
+    const value = localStorage.getItem(_userKey);
     callback(value);
   }
 
@@ -5799,7 +5782,7 @@ raygunRumFactory(window, window.jQuery, window.__instantiatedRaygun);
           captureUnhandledRejections = value;
           break;
 
-        default:  // added AK/22-Sep-21
+        default:  //ak
           throw new Error(`Unexpected key: ${key}`)
       }
     }
@@ -5885,7 +5868,6 @@ try {
 } catch (e) {
   window['__instantiatedRaygun'] = undefined;
 }
-
 const rg4js = window.rg4js || fail("No '.rg4js'");
 
 // Note: Must leave 'window.rg4js' to exist, since the UMD-inherited loading mechanism uses it.
@@ -5893,4 +5875,44 @@ const rg4js = window.rg4js || fail("No '.rg4js'");
 
 function fail(msg) { throw new Error(msg) }
 
-export { rg4js }
+//--- Takeover instrumentation
+
+let _processExceptionF = () => fail("'takeOver' not called before 'processException' called by RG plain")
+let _makePostCorsRequestF = () => fail("'takeOver' not called before 'makePostCorsRequest' called by RG plain")
+
+/*
+* Replaces 'processException' within the Plain client code. Used for testing
+* or replacing the send/offline store logic.
+*/
+function processException(stackTrace, options, userTriggered, error) {
+
+  console.log("!!! processException", { stackTrace, options, userTriggered, error });
+    //
+    // stackTrace:  {
+    //    mode: 'stack'
+    //    name: 'Error'
+    //    message: string
+    //    url: 'http://localhost/'
+    //    stack: Array of object
+    //    useragent: 'Mozilla/5.0 (darwin) AppleWebKit/537.36 (KHTML, like Gecko) jsdom/16.7.0'
+    //    stackString: ...multiline string...
+    //  }
+    //  options: { customData: {}, tags: [] }
+    //  userTriggered: boolean
+    //  error: Error
+
+  return _processExceptionF(stackTrace, options, userTriggered, error);
+}
+
+function makePostCorsRequest(url, data, _successCallback, _errorCallback) {
+  console.log("!!! makePostCorsRequest", { url, data, _successCallback, _errorCallback });
+
+  return _makePostCorsRequestF(url, data, _successCallback, _errorCallback);
+}
+
+function takeOver({ processException, makePostCorsRequest } ) {
+  if (processException) _processExceptionF = processException;
+  if (makePostCorsRequest) _makePostCorsRequestF = makePostCorsRequest;
+}
+
+export { rg4js, takeOver }

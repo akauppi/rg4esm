@@ -4,5 +4,5 @@
 /**/dist/*
 !/**/dist/index.html
 
-# semi-secret
-#/.env.local
+# Local tools
+sh/run-no.sh

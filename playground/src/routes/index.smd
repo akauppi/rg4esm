@@ -1,0 +1,38 @@
+
+# Send errors to Raygun
+
+There are two ways to ship errors to the Raygun dashboard: explicitly and by catching errors that leaked through.
+Let's exercise these and see that the errors get reported in the Raygun dashboard.
+
+## Explicit
+
+<div>
+  <label for="msg1">Nag:</label>
+  <input type="text" id="msg1" placeholder="error message here.." />
+  <button onclick="rgSend( getElementById('msg1').value )">Send</button>
+</div>
+
+## Safe-guarded
+
+
+## Follow-up
+
+- Open the [Raygun dashboard](https://app.raygun.com)
+- ..under the project you gave `RAYGUN_API_KEY` for
+- > `Crash Reporting`
+
+Can you see the errors provided above?
+
+---
+
+Next: [offline](/offline)
+
+<script>
+  //import { send } from '@local/package'
+  function rgSend(msg) {
+    //send(msg);
+    alert(22);
+  }
+
+  export { rgSend }
+</script>

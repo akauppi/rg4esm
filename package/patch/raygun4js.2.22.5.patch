@@ -1,0 +1,12 @@
+--- lib/raygun.esm.js	2021-10-20 18:54:57.000000000 +0300
++++ a	2021-10-20 19:00:31.000000000 +0300
+@@ -5795,6 +5795,9 @@
+         case 'captureUnhandledRejections':
+           captureUnhandledRejections = value;
+           break;
++
++        default:  //ak
++          throw new Error(`Unexpected key: ${key}`)
+       }
+     }
+   };

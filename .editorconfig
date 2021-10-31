@@ -1,6 +1,6 @@
 root = true
 
-[*.{js,svelte,css,json}]
+[*.{js,svelte,css,json,smd,md}]
 indent_style = space
 indent_size = 2
 trim_trailing_whitespace = true
