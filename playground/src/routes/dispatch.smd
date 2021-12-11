@@ -1,0 +1,93 @@
+
+# Dispatch errors to Raygun
+
+There are two ways to ship errors to the Raygun dashboard: explicitly and by catching errors that leaked through.
+Both of these mechanisms store errors for later delivery (until the browser session is closed), if the connection
+is momentarily offline.
+
+Let's exercise these and see that the errors get reported in the Raygun dashboard.
+
+## Explicit
+
+First, exercise the mechanism explicitly. You can attach **custom data** and/or **tags** to your errors. Tags can be used for
+filtering errors. Both are visible in the dashboard. Contextual information (browser type etc.) is automatically attached
+to the errors.
+
+<form>
+  <input type="text" bind:value={msg1} placeholder="error message here.." />
+  <input type="text" bind:value={tags1} placeholder="tags,like,this" />
+  <input type="text" bind:value={userdata1} placeholder="&lbrace; key: 'value' &rbrace;   // ie. in JSON" />
+  <button on:click={ async (ev) => {
+    const elSt = document.getElementById('st1');
+    elSt.text = "Processing...";
+      //
+    const st = await send( msg1, userdata1, tags1 );
+    elSt.text = `Error was ${ st ? 'delivered':'queued' }`;
+    msg1 = '';
+  } }>Send!!</button>
+
+  <span id="st1"></span>
+</form>
+
+## Catch and Send
+
+<button on:click={ () => { boomCount+=1; throw new Error("It says Boom!!!!!") } }>Boom!!!</button>
+
+## Follow-up
+
+- Open the [Raygun dashboard](https://app.raygun.com) under the project you gave `RAYGUN_API_KEY` for
+  - `Crash Reporting`
+
+- [ ] Do you see errors with: { sentErrors }
+- [ ] Do you see { boomCount } errors with: *"It says Boom!!!!!"*
+
+## Offline
+
+The same mechanism should also work over offline situations.
+
+1. Switch off your network connection: <OnlineStatus />
+2. Press
+   <button on:click={ () => { send("Error offline"); } }>Send error while offline</button>
+   a couple of times...
+3. Switch back online
+4. Press once more - or wait ~5s
+5. Check in the console log to see when errors are shipped from the queue.
+6. Check in the Raygun dashboard that the errors arrived!!
+
+Errors queued during offline carry the original time stamp. They have an added `$delayed` tag added, to show that they
+were not delivered immediately.
+
+---
+
+Next: [user](/user)
+
+<!-- tbd. align right, as `Next` custom tag? -->
+
+<script>
+  let msg1;
+  let userdata1;
+  let tags1;
+
+//let sentErrors = ['a','b'];   // BUG: This does NOT behave reactively (why??)
+  let boomCount = 0;
+  let sentErrors = [];
+
+  import { onMount } from 'svelte'
+
+  import { init, dispatch } from '@local/package'
+  import OnlineStatus from '../components/OnlineStatus.svelte'
+
+  onMount( () => {
+    init( import.meta.env.VITE_RAYGUN_API_KEY, {
+      //...
+    });
+  });
+
+  function send(msg) {    // (string) => ()
+    send2( new Error(msg) )
+  }
+
+  function boom() {
+    throw new Error("Yay!!!!");
+  }
+</script>

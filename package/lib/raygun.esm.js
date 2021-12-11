@@ -3044,7 +3044,7 @@ var raygunFactory = function(window, $, undefined) {
       return Raygun;
     },
 
-    //*** REPLACE??
+    /*** REPLACE??
     send: function(ex, customData, tags) {
       if (_disableErrorTracking) {
         Raygun.Utilities.log('Error not sent due to disabled error tracking');

@@ -1,7 +1,7 @@
 <!-- src/routes/__layout.svelte -->
 <nav>
-  <a href="/">Send</a>
-  <a href="/offline">Offline</a>
+  <a href="/dispatch">Dispatch</a>
+  <a href="/user">User</a>
   <!-- tbd. more to come -->
 </nav>
 

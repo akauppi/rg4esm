@@ -22,6 +22,12 @@ A re-packaging of [`raygun4js`](https://www.npmjs.com/package/raygun4js) intende
    
    >To just try out (without dashboard), you can provide a fake API key like `RAYGUN_API_KEY=x`.
 
+<!-- Developed on:
+- macOS 12.0
+- node 17.2
+- npm 8.1
+-->
+
 
 ## Development
 

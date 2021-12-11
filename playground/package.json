@@ -3,31 +3,19 @@
   "description": "Web app for seeing how Raygun dashboard reacts to events, via the non-plain client.",
   "type": "module",
   "private": true,
-  "bin": {
-    "checkApiKey": "./tools/check-api-key.js"
-  },
   "scripts": {
     "dev": "svelte-kit dev",
-    "lint": "eslint --ignore-path .gitignore .",
-    "//dev": "npm run -s _checkApiKey && svelte-kit dev",
-    "-- ": "",
-    "_checkApiKey": "npm run -s _checkApiKey1 && npm run -s _checkApiKey2",
-    "_checkApiKey1": "[ ! -z $RAYGUN_API_KEY ] || ( >&2 echo \"ERROR: Please provide 'RAYGUN_API_KEY' env.var\n\"; false)",
-    "_checkApiKey2": "checkApiKey $RAYGUN_API_KEY || ( >&2 echo \"ERROR: API key '${RAYGUN_API_KEY}' was not accepted by Raygun servers.\n\"; false)"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@local/rg4esm": "file:../package"
   },
   "devDependencies": {
-    "@local/self": "file:.",
     "@sveltejs/kit": "next",
-    "eslint": "^8.1.0",
+    "eslint": "^8.2.0",
     "mdsvex": "^0.9.8",
-    "node-fetch": "^3.0.0",
+    "node-fetch": "^3.1.0",
     "eslint-plugin-svelte3": "^3.2.1",
-    "svelte": "^3.44.0"
-  },
-  "~~devDependencies": {
-    "~~sveltestrap": "^5.6.3"
+    "svelte": "^3.44.1"
   }
 }

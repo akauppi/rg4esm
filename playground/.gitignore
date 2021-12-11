@@ -2,3 +2,6 @@
 /build
 /.svelte-kit
 /package
+
+# Raygun API key
+/.env.local

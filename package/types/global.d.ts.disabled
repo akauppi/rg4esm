@@ -1,0 +1,31 @@
+/*
+* Ambient type declarations
+*
+* ..so that your IDE will show the right types. :)
+*
+* References:
+*   - "Ambient declarations"
+*       -> https://basarat.gitbook.io/typescript/type-system/intro
+*/
+
+/***
+// index.js
+//
+declare function init(apiKey: string, opts?: Opts): { send: SendF };
+  //
+  type Opts = {
+    errorMonitoring?: boolean,
+    realUserMonitoring?: boolean
+  }
+  type SendF = (Error) => void;
+
+// errorMonitoring
+//
+//type OnCatchF = (Error) => void;
+//declare function _init({ onCatch: OnCatchF }): void;
+
+// tools
+//
+type FetchF = (resource: any, init?: {}) => Promise<Response>;   // tbd.
+
+***/

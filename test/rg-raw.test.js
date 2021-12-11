@@ -1,7 +1,7 @@
 /*
 * rg-raw.test.js
 *
-* Test the (patched) Raygun plain client's behaviour. This also tests our approach of hijacking the network requests.
+* Test the (patched) Raygun plain client's behaviour. This also tests our approach of hijacking its functions.
 *
 * @jest-environment jsdom
 */
@@ -13,16 +13,16 @@ describe ('Raygun plain client', () => {
   //const apiKey = "abc"
 
   const processException_MockF = jest.fn();
-  const makePostCorsRequest_MockF = jest.fn();
+  //const makePostCorsRequest_MockF = jest.fn();
 
   beforeAll(() => {
     takeOver({
       processException: processException_MockF,
-      makePostCorsRequest: makePostCorsRequest_MockF
+      //makePostCorsRequest: makePostCorsRequest_MockF
     });
   });
 
-  test('can explicitly send an Error (and we can intercept RG comms)', () => {
+  test('can explicitly send an Error (that we can intercept)', () => {
 
     rg4js('send', new Error("just saying.."))
 

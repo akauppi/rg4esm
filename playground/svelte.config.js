@@ -3,9 +3,7 @@ import { mdsvex } from "mdsvex"
 const mdsvexConfig = {
   extensions: [".smd"],
 
-  smartypants: {
-    dashes: "oldschool"
-  },
+  smartypants: false,    // 'true' (or leaving out) gives: "Unexpected character '’'"
 
   remarkPlugins: [],
   rehypePlugins: []
@@ -18,9 +16,10 @@ const config = {
     mdsvex(mdsvexConfig)
   ],
   kit: {
+    ssr: false,
     // hydrate the <div id="svelte"> element in src/app.html
     target: '#svelte'
-  }
+  },
 };
 
 export default config;

@@ -30,9 +30,14 @@ In short, trying to make a client one can just "plug in" and use with one's app.
 |Uses [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance)|yes|optional; not on by default|
 |offline aware|yes|optional; not on by default|
 |page change observation|automatic|explicit, by calling [`rg4js('trackEvent', ...)`](https://raygun.com/documentation/language-guides/javascript/vuejs/#step-4-track-route-changes)|
+|**Differences**|
+|storing of unsent Errors|not over browser sessions `(*)`|stores in Local Storage; retrying if the site is visited again|
+|Error reporting: `Request`|does not ship; considered a server-side feature|reports certain fields|
 |**Abandoned**|
 |IE support|no|IE10+; Crash Reporting supports IE8+|
 |"jQuery hooks"|no|included, except in "vanilla" variant|
+
+>`(*)`: There's no telling how long a gap a person might have between coming back to a web app. Therefore, no effort is taken to deliver Errors if the session is closed. Avoids shipping old errors.
 
 You should be able to use the client simply by reading this page and studying the [sample application](http://github.com/akauppi/raygun4js-esm). 
 
