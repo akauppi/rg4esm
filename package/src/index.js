@@ -11,6 +11,7 @@ import { init as initErrorMonitoring } from './errorMonitoring'
 import { setUser, dropBreadcrumb, init as initContext } from './context'
 import { init as initCatchErrors } from './catch'
 
+import { fail } from './shared/fail'
 
 /**
  * Initialize the client.
@@ -25,13 +26,14 @@ import { init as initCatchErrors } from './catch'
  */
 function init(apiKey, { appVersion, tags = [], errorMonitoring = {}, realUserMonitoring = {} }) {
 
-  function conv(x, debugName) {
-    if (x === true) return {};
-    if (x === false) return false;
-    fail(`Bad '${debugName}' (expecting {...}|bool): ${x}`)
-  }
-  errorMonitoring = conv(errorMonitoring);
-  //realUserMonitoring = conv(realUserMonitoring);
+  // Convert config subset to '{...}' or 'false'
+  const f = (x, debugName) =>
+    (x === true) ? {} :
+    (x === false || typeof x === 'object') ? x :
+    fail(`Bad '${debugName}' (expecting {...}|bool): ${x}`);
+
+  errorMonitoring = f(errorMonitoring);
+  //realUserMonitoring = f(realUserMonitoring);
 
   initContext({apiKey, appVersion, tags});
 

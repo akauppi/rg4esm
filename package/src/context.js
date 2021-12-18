@@ -2,56 +2,55 @@
 * context.js
 *
 * Collection of context (breadcrumbs, user, tags, ...) and exposing it to subpackages.
-*
-* Note: This needs to be initialized first.
 */
+import { fail } from './shared/fail'
 
-// tbd. #JSDoc types to the vars
+// 'undefined' when the user is unknown (not set, yet)
+// 'null' for a guest user. #tbd
+//
+/** @type User|null|undefined */    let currentUser;
 
-/** @type User */
-let currentUser;
-/** @type Breadcrumb[] */
-const currentBreadcrumbs = [];
+/** @type Breadcrumb[] */           const currentBreadcrumbs = [];
 
-/**
- * tbd. how to mark types here?
- * @_type {string[]|undefined} _tags
- */
-let _tags;
-let _appVersion;
-let _apiKey;
+/** @type {string[]|undefined} */   let _tags;
+/** @type {string|undefined} */     let _appVersion;
+/** @type {string|undefined} */     let _apiKey;
 
-import { fail } from './common'
+//--- User ---
 
-/*--- User
+/** @param {User} user
+  @return {void}
 */
-/** @param {User} userObj @return {void} */
-function setUser(userObj) {
-  currentUser = userObj;
+function setUser(user) {
+  currentUser = user;
 }
 
-/** @return {User|undefined|null} */
+/** @return {User|undefined|null}
+*/
 function getCurrentUser() {
   return currentUser;
 }
 
-/*--- Breadcrumbs
+//--- Breadcrumbs ---
+
+/** @param {Breadcrumb} crumb
+  @return {void}
 */
-/** @param {Breadcrumb} crumbObj @return {void} */
-function dropBreadcrumb(crumbObj) {
+function dropBreadcrumb(crumb) {
 
   // tbd. when to clear / limit the length of collected crumbs?
-  currentBreadcrumbs.push(crumbObj);
+  currentBreadcrumbs.push(crumb);
 }
 
-/** @return {Breadcrumb[]} */
+/** @return {Breadcrumb[]}
+*/
 function getCurrentBreadcrumbs() {
   return currentBreadcrumbs;
 }
 
-/*--- Tags, App version etc.
+/*--- Tags, App version etc. ---
 *
-* Things that are expected to set only once - at the initialization of the client. (client's rule, not Raygun's)
+* Things that are expected to be set only once at the initialization of the client. (client's rule, not Raygun's)
 */
 
 /**

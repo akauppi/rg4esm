@@ -5,30 +5,27 @@
 *   - Raygun docs > Crash Reporting > API Reference
 *     -> https://raygun.com/documentation/product-guides/crash-reporting/api
 */
-import { genDispatcher } from '../tools/genDispatcher'
+import { genDispatcher } from '../shared/genDispatcher'
 
 import { PACKAGE_NAME, PACKAGE_VERSION } from '../config'
 import { getCurrentUser, getCurrentBreadcrumbs, getTags, getAppVersion } from "../context"
 
-const rgURL = "https://api.raygun.com/entries";
-const dispatcher = genDispatcher( rgURL, "POST" );
+const rgEntriesURL = "https://api.raygun.com/entries";
+const dispatcher = genDispatcher( rgEntriesURL, "POST" );
 
 /**
  * Try to ship an Error. If no network, queued for later (automatic) delivery.
  *
  * Completes as:
- *   - true if delivered (proof it's heared by Raygun)
- *   - false if queued (delivery will be attempted, but no guarantees; lost eg. if the user closes the browser).
+ *   - true if delivered on first try (heard by Raygun)
+ *   - false if queued (delivery will be attempted, but no guarantees; lost e.g. if the user closes the browser).
  *
  * @param {Error} error
- * @return {Promise<bool>}
+ * @return {Promise<boolean>}
  */
 async function dispatchError(error) {
-
   console.log("Getting error like this:", error);
-  const {
-    message: /*as*/ err_message   // string
-  } = error;
+  const err_message = error.message;  // string
 
   const now = new Date();
 
@@ -39,9 +36,9 @@ async function dispatchError(error) {
     occurredOn: now.toISOString(),     // "2021-11-08T17:57:29.184Z"
 
     details: {
-      //machineName: ...,           // "The name of machine this error occurred on"
-      //groupingKey: "ErrorGroup",  // "Client defined error grouping key. [...] 1-100 chars, ideally the result of a hash function [...]"
       version: getAppVersion(),     // version of the [web] app
+
+      //groupingKey: "ErrorGroup",  // "Client defined error grouping key. [...] 1-100 chars, ideally the result of a hash function [...]"
 
       client: {
         name: PACKAGE_NAME,
@@ -65,23 +62,28 @@ async function dispatchError(error) {
       // "Information about the environment at the time of the error. Each of these properties are optional."
       //
       environment: {
-        osVersion: "...",   // tbd.
+        //osVersion: "...",   // tbd.
         //resolutionScale:        // can we get this for a browser?? (plain client doesn't do it)
         //locale:     // "en-nz"|...
         utcOffset: new Date().getTimezoneOffset() / -60.0,   // (as per plain client 2.22.5)
 
-        browser: navigator.appCodeName,
-        browserName: navigator.appName,
-        "browser-Version": navigator.appVersion,
-        platform: navigator.platform,    // "Win32"|...
+        //browser: navigator.appCodeName,   // DEPRECATED. "All browsers return 'Mozilla' as the value of this property."
+        //browserName: navigator.appName,   // DEPRECATED. "Always 'Netspace', in any browser"
+
+        "browser-Version": navigator.appVersion,    // DEPRECATED
+          // Safari 15 on macOS: "5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15"
+          // Chrome 95 on macOS: "5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36"
+
+        platform: navigator.platform,
+          // "Win32"|"MacIntel"|...
 
         // 'Browser-{Width|Height}' and 'Screen-{Width|Height}' omitted by purpose.
         // 'Color-Depth' omitted by purpose.
 
-        // Fields mentioned in the plain client code - but not in the API definition.
+        // Fields mentioned in the plain client code (2.22.5) - but not in the API definition.
         //
-        "User-Language": navigator.userLanguage,    // "deprecated, ... consult docs for better alternative"
-        "Document-Mode": document.documentMode,   // ?? what is it? (not recognized by WebStorm IDE)
+        //"User-Language": navigator.userLanguage,    // "deprecated, ... consult docs for better alternative"
+        //"Document-Mode": document.documentMode,     // ?? what is it? (not recognized by WebStorm IDE)
       },
 
       // "Tags that should be applied to the error. [...] searchable and filterable on the dashboard."
@@ -93,22 +95,26 @@ async function dispatchError(error) {
       /*userCustomData: {   // tbd???
       },*/
 
-      // "Information about the user [that caused the error]" who SUFFERS FROM the error  <-- really, you blame the User!!!?!?!!!
+      // "Information about the user [that caused the error]"  <-- really, Raygun plain client blames the User!!!?!?!!!
+      // (rather: "who SUFFERS FROM the error!")
       //
       user: getCurrentUser(),
 
       breadcrumbs: getCurrentBreadcrumbs(),
 
-      // Note:
-      //  Plain client adds 'Request', but it's a server-side concept so carrying URL and some headers is a misuse
-      //  of the data structure, at best. We don't.
+      // 'Request' omitted by purpose, though plain client adds it.
+      //
+      // It's a server-side concept so carrying URL and some headers is a misuse of the data structure, at best. We don't.
+
+      // 'machineName' omitted by purpose   // "The name of machine this error occurred on" - not relevant for browser app
     }
   }
 
-  console.debug("Prepared for dispatch:", { o });
+  console.debug("Prepared for dispatch:", o);
 
   return dispatcher(o).then( b => {
     console.debug( b ? "delivered at first try" : "queued for later")
+    return b;
   });
 }
 

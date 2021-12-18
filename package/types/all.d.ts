@@ -1,12 +1,10 @@
 /*
-* types/main.d.ts
+* types/all.d.ts
 *
 * Based on:
 *   - API Reference [#1]
 *     -> https://raygun.com/documentation/product-guides/crash-reporting/api/
 */
-
-import './user'
 
 // Raygun Breadcrumb
 //
@@ -37,4 +35,17 @@ declare interface Breadcrumb {
 
   // "custom data [...] about application state"
   customData?: object
+}
+
+// Raygun user
+//
+declare interface User {
+  identifier: string,     // "Unique identifier for the user"
+  isAnonymous: boolean,   // true: it's a guest (not logged in); false (logged in, including "anonymous login" ála Firebase!)
+
+  //email: string
+  //fullName: string
+  //firstName: string
+
+  //uuid: string
 }

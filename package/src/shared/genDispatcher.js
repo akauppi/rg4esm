@@ -14,12 +14,12 @@ import { getApiKey } from '../context'
  * Try to make a network request. If no network, queued for later (automatic) delivery.
  *
  * Completes as:
- *   - true if delivered (proof it's heared by Raygun)
- *   - false if queued (delivery will be attempted, but no guarantees; lost eg. if the user closes the browser).
+ *   - true if delivered on first try (heard by Raygun)
+ *   - false if queued (delivery will be attempted, but no guarantees; lost e.g. if the user closes the browser).
  *
  * @param {string} url
  * @param {'POST'} method
- * @return {(Object) => Promise<bool>}
+ * @return {(Object) => Promise<boolean>}
  */
 function genDispatcher(url, method = 'POST') {
   const apiKey = getApiKey();
@@ -35,6 +35,8 @@ function genDispatcher(url, method = 'POST') {
       .catch(err => {  // "reject on network failure or if anything prevented the request from completing"
 
     });
+
+    // tbd. analyze 'resp'
   }
 }
 

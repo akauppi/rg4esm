@@ -10,7 +10,7 @@ const o = {
   // need to explicitly import 'test' etc.
   injectGlobals: false,
 
-  // If '@local/package' only exposes one export, Jest 27.3 is able to feed on it.
+  // If '@local/package' only exposes one export, Jest 27.3+ is able to feed on it.
   //
   //resolver: "tools/jestResolver.cjs"
 };

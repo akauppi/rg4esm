@@ -8,15 +8,16 @@
     "node": ">= 16"
   },
   "devDependencies": {
+  },
+  "//devDependencies": {
     "@local/package": "file:./package",
-    "jest": "^27.3.1"
+    "jest": "^27.4.4"
   },
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config test/jest.config.js --verbose --detectOpenHandles --all",
-    "-- ": "",
     "build": "npm --prefix package run build",
     "dev": "(cd demo && npm run dev)",
-    "-- -": "",
-    "preinstall": "npm --prefix package install"
+    "//#later test": "NODE_OPTIONS=--experimental-vm-modules jest --config test/jest.config.js --verbose --detectOpenHandles --all",
+    "-- ": "",
+    "preinstall": "npm --prefix package install && npm --prefix demo install"
   }
 }

@@ -12,11 +12,10 @@
 import { dispatchError } from "./errorMonitoring/dispatchError"
 
 /**
- * Call to activate error capture.
+ * Activate error capture.
  *
- * @return {void}
- * @private
- */
+ @return {void}
+*/
 function init() {
 
   window.onerror = function (message, source, lineno, colno, error) {

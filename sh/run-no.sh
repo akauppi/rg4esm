@@ -3,7 +3,7 @@ set -eu -o pipefail
 
 # List possibly outdated dependencies, in all the subpackages.
 #
-PATHS=". package playground"
+PATHS=". package demo"
 
 for _PATH in $PATHS   # overriding 'PATH'... not recommended.
 do
