@@ -1,29 +1,30 @@
 /*
 * src/index.js
 *
-* Main entry point. Raygun offering specific functionality is implemented in:
-*   - errorMonitoring
-*   - realUserMonitoring
+* Main entry point.
 */
-import { init as initErrorMonitoring } from './errorMonitoring'
+import { dispatchError } from './errorMonitoring'
 //import { init as initRealUserMonitoring } from './realUserMonitoring'
 
 import { setUser, dropBreadcrumb, init as initContext } from './context'
-import { init as initCatchErrors } from './catch'
 
 import { fail } from './shared/fail'
 
 /**
- * Initialize the client.
- *
- * @public
- * @param {string} apiKey
- * @param {string} appVersion
- * @param {string[]} tags
- * @param { {}|boolean } errorMonitoring
- * @param { {}|boolean } realUserMonitoring
- * @return {void}     // note: this doesn't show in the IDE..
- */
+* Initialize the client.
+*
+* @public
+* @param {string} apiKey
+* @param {string} appVersion
+* @param {string[]} tags
+* @param { {}|boolean } errorMonitoring
+* @param { {}|boolean } realUserMonitoring
+* @return {void}
+*
+* References:
+*  - GlobalEventHandlers.onerror
+*     -> https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
+*/
 function init(apiKey, { appVersion, tags = [], errorMonitoring = {}, realUserMonitoring = {} }) {
 
   // Convert config subset to '{...}' or 'false'
@@ -38,12 +39,22 @@ function init(apiKey, { appVersion, tags = [], errorMonitoring = {}, realUserMon
   initContext({apiKey, appVersion, tags});
 
   if (errorMonitoring) {
-    initCatchErrors();
+
+    window.onerror = function (message, source, lineno, colno, error) {
+      console.log("Caught:", {message, source, lineno, colno, error});
+
+      dispatchError(error).then( _ => {
+        // also throw it!?!?
+        throw error;
+      })
+    };
   }
 }
 
 export {
   init,
   setUser,
-  dropBreadcrumb
+  dropBreadcrumb,
+    //
+  dispatchError as dispatchError_INTERNAL   // for playground
 }

@@ -3,9 +3,9 @@ set -eu -o pipefail
 
 # List possibly outdated dependencies, in all the subpackages.
 #
-PATHS=". package demo"
+PATHS="package playground"
 
-for _PATH in $PATHS   # overriding 'PATH'... not recommended.
+for _PATH in $PATHS   # hint: overriding 'PATH' not cool ;)
 do
   # 'npm ... outdated' (npm 8.0.0) exits with non-0 if there are outdated entries. We want to keep going.
   #

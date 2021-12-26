@@ -1,0 +1,39 @@
+# Context
+
+Errors captured by Rg4esm capture the following context:
+
+||Purpose|Sample|Place in Raygun dashboard|
+|---|---|---|---|
+|**Application**|
+|&nbsp;&nbsp;Tags|Application specific information you wish to track.|`demo`|<font color=red>tbd...</font>|
+|&nbsp;&nbsp;Version|Application version|`1.2.x`|<font color=red>tbd...</font>|
+|**Runtime**|
+|&nbsp;&nbsp;Browser&nbsp;type|||<font color=red>tbd...</font>|
+
+<!-- tbd. Add userdata, eventually. It's like tags but key-value pairs.
+
+|&nbsp;&nbsp;Userdata|Application specific information you wish to track.|`something=12`|||
+-->
+
+This client treats tags as constant during the application session.
+
+## Try it!
+
+- For the errors already sent, check that:
+  - [ ] Tags is `...`
+  - [ ] Version is `...`
+  - [ ] Browser type matches your browser
+
+
+---
+
+Next: [xxx](/xxx)
+
+<!-- tbd. align right, as `Next` custom tag? -->
+
+<!-- see TRACK.md -->
+{#if false}<slot/>{/if}
+
+<script>
+let msg1;
+</script>

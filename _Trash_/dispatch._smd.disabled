@@ -74,7 +74,8 @@ Next: [user](/user)
 
   import { onMount } from 'svelte'
 
-  import { init, dispatch } from '@local/package'
+  import { init } from '@local/package'
+  import { dispatchError } from '@local/package/unofficial'
   import OnlineStatus from '../components/OnlineStatus.svelte'
 
   onMount( () => {

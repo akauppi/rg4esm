@@ -1,5 +1,5 @@
 /*
-* config.js
+* src/config.js
 *
 * Common configuration.
 */

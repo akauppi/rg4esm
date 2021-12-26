@@ -1,0 +1,39 @@
+
+# Error capture and delivery to Raygun
+
+Rg4esm catches uncaught errors and reports them to the Raygun dashboard.
+
+## Send an error
+
+<form>
+  <input type="text" bind:value={msg1} placeholder="error message here.." />
+  <button on:click={ async (ev) => {
+    throw new Error(msg1);
+  } }>Throw an error!!</button>
+</form>
+
+- [ ] Throw an error and see that it reached the Raygun dashboard.
+
+## Offline
+
+If the Raygun service is (momentarily) unavailable, `rg4ems` will retry in a moment.
+
+1. Switch off network connection
+2. Send another error with the above button
+3. Wait a moment before switching the connection back on
+
+- [ ] Check that the offline-sent error reached Raygun dashboard.
+
+
+---
+
+Next: [context](/context)
+
+<!-- tbd. align right, as `Next` custom tag? -->
+
+<!-- see TRACK.md -->
+{#if false}<slot/>{/if}
+
+<script>
+let msg1;
+</script>

@@ -21,3 +21,8 @@ Decided to go with Rollup, but Vite would:
 
 Maybe.. `#later`
 -->
+
+## Playground to serve for tests (to be done)
+
+See [#1](https://github.com/akauppi/rg4esm/issues/1).
+

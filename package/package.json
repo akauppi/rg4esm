@@ -1,7 +1,7 @@
 {
   "name": "rg4esm",
   "version": "0.0.0-alpha.3",
-  "description": "Raygun client for ESM capable browsers",
+  "description": "Raygun client for ESM capable (evergreen) browsers",
   "license": "MIT",
   "repository": {
     "type": "git",

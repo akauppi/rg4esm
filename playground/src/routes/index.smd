@@ -1,0 +1,26 @@
+
+# Rg4ESM - Playground
+
+This playground lets you exercise the Raygun connection under API key <code>{apiKey}</code>.
+
+<!-- mdsvex note: `{apiKey}` doesn't work.
+-->
+
+- Open the [Raygun dashboard](https://app.raygun.com) to observe the changes, once you play here.
+
+- Press 'Next' to exercise the client
+
+---
+
+Next: [Error capture](/error-capture)
+
+<!--
+*The pages are intended to be used for **testing** as well, once we get there.*
+-->
+
+<script>
+  export
+  const apiKey = import.meta.env.VITE_RAYGUN_API_KEY;
+</script>
+
+{#if false}<slot />{/if}  <!-- to mitigate a warning -->

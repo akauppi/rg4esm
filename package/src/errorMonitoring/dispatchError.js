@@ -1,4 +1,6 @@
 /*
+* src/errorMonitoring/dispatchError.js
+*
 * Dispatch an Error to Raygun; potentially waiting until online.
 *
 * References:
@@ -11,7 +13,8 @@ import { PACKAGE_NAME, PACKAGE_VERSION } from '../config'
 import { getCurrentUser, getCurrentBreadcrumbs, getTags, getAppVersion } from "../context"
 
 const rgEntriesURL = "https://api.raygun.com/entries";
-const dispatcher = genDispatcher( rgEntriesURL, "POST" );
+
+let myDispatcher;
 
 /**
  * Try to ship an Error. If no network, queued for later (automatic) delivery.
@@ -112,7 +115,9 @@ async function dispatchError(error) {
 
   console.debug("Prepared for dispatch:", o);
 
-  return dispatcher(o).then( b => {
+  myDispatcher || (myDispatcher = genDispatcher( rgEntriesURL, "POST" ));
+
+  return myDispatcher(o).then( b => {
     console.debug( b ? "delivered at first try" : "queued for later")
     return b;
   });

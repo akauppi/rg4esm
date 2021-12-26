@@ -7,6 +7,10 @@
 -     try sends also when the state is reported as offline. It's complicated - and seeing how this indicator
 -     behaves helps us understand the browsers.
 -
+- Usage:
+-   - either as a UI component or
+-   - 'import { isOnline } from 'components/OnlineStatus.svelte'
+-
 - References:
 -   - "Online and offline events" (MDN)
 -     -> https://developer.mozilla.org/en-US/docs/Web/API/Navigator/Online_and_offline_events

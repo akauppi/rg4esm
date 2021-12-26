@@ -1,0 +1,24 @@
+/*
+* tools/onlineStatus.js
+*
+* A Svelte 'Readable' for observing the browser's claimed online/offline status.
+*
+* References:
+*   - "Online and offline events" (MDN)
+*     -> https://developer.mozilla.org/en-US/docs/Web/API/Navigator/Online_and_offline_events
+*/
+import { readable } from 'svelte/store'
+
+const isOnline = readable(navigator.onLine, function start(set) {
+  function updateStatus() {
+    set(navigator.onLine);
+  }
+  window.addEventListener('online',  updateStatus);
+  window.addEventListener('offline', updateStatus);
+
+  return function stop() {};
+});
+
+export {
+  isOnline
+}

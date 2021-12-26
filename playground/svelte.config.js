@@ -1,25 +1,30 @@
+/*
+* Fashioned according to https://github.com/mvasigh/sveltekit-mdsvex-blog
+*/
+import adapter from '@sveltejs/adapter-static'
 import { mdsvex } from "mdsvex"
 
-const mdsvexConfig = {
-  extensions: [".smd"],
+const extensions = [".smd"];
 
-  smartypants: false,    // 'true' (or leaving out) gives: "Unexpected character '’'"
-
-  remarkPlugins: [],
-  rehypePlugins: []
+const o2 = {
+  extensions,
+  smartypants: {
+    dashes: 'oldschool'   // tbd. explaaaaain!!??
+  }
 }
 
-/** @type {import('@sveltejs/kit').Config} */
-const config = {
-  extensions: [".svelte", ...mdsvexConfig.extensions],
-  preprocess: [
-    mdsvex(mdsvexConfig)
-  ],
+/** @type {import('@sveltejs/kit').Config}
+*/
+const o = {
+  extensions: [".svelte", ...extensions],
+  preprocess: [ mdsvex(o2) ],
   kit: {
-    ssr: false,
-    // hydrate the <div id="svelte"> element in src/app.html
-    target: '#svelte'
-  },
+    target: '#svelte',  // hydrate the <div id="svelte"> element in src/app.html
+    adapter: adapter(),
+    prerender: {
+      onError: 'continue'   // tbd. explain??
+    }
+  }
 };
 
-export default config;
+export default o;

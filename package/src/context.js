@@ -1,5 +1,5 @@
 /*
-* context.js
+* src/context.js
 *
 * Collection of context (breadcrumbs, user, tags, ...) and exposing it to subpackages.
 */

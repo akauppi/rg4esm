@@ -7,15 +7,9 @@
   "engines": {
     "node": ">= 16"
   },
-  "devDependencies": {
-  },
-  "//devDependencies": {
-    "@local/package": "file:./package",
-    "jest": "^27.4.4"
-  },
   "scripts": {
     "build": "npm --prefix package run build",
-    "dev": "(cd demo && npm run dev)",
+    "dev": "npm --prefix playground run dev",
     "//#later test": "NODE_OPTIONS=--experimental-vm-modules jest --config test/jest.config.js --verbose --detectOpenHandles --all",
     "-- ": "",
     "preinstall": "npm --prefix package install && npm --prefix demo install"
