@@ -1,6 +1,8 @@
 # Dev notes
 
-## Typescript types in JSDoc
+## Defining types in JSDoc
+
+The sources include type definitions for the APIs, without requiring TypeScript.
 
 ```
 /**
@@ -9,8 +11,6 @@
 ```
 
 See [Support for TypeScript types in JSDoc](https://blog.jetbrains.com/webstorm/2021/06/webstorm-2021-2-eap-4/#support_for_typescript_types_in_jsdoc) (Webstorm blog, Jun 2021)
-
-These are ad-hoc type definitions meant for showing the types in the IDE. It's like Typescript - but less.
 
 ### References
 

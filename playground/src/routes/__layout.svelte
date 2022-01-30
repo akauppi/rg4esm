@@ -19,13 +19,14 @@
 </style>
 
 <script context="module">
-  import { onMount } from 'svelte'
   import { init } from '@local/rg4esm'
   import { name, version } from "@local/package/package.json"
   const [PACKAGE_NAME, PACKAGE_VERSION] = [name, version];
 
   // Vite HMR may cause 'onMount' to be called multiple times (under development)
   let initialized = false;
+
+  //import { browser } from '$app/env'    // tbd. use this
 
   const [SSR, DEV] = [import.meta.env.SSR, import.meta.env.DEV];
 
@@ -38,9 +39,9 @@
 
   /** @type {import('@sveltejs/kit').Load}
   */
-  export async function load({ page, fetch, session, stuff }) {
+  export async function load({ url, params, fetch, session, stuff }) {
     if (!SSR) {
-      console.log("!!! load", { page, session, stuff, initialized });  // DEBUG
+      console.log("!!! load", { url, params, session, stuff, initialized });  // DEBUG
 
       if (import.meta.env.DEV && initialized) {
         console.log("Already initialized; skipping..");

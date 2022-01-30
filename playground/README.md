@@ -6,9 +6,7 @@ A web app for trying out Raygun integration in practise.
 ## Requirements
 
 - npm
-- Raygun API key
-
-  Save the Raygun API key in `.env.local`:
+- Raygun API key in `.env.local`:
 
   ```
   VITE_RAYGUN_API_KEY=PzE8...kfYQ
@@ -25,7 +23,7 @@ $ npm install
 $ npm run dev
 ```
 
-- Open `http://localhost:3000` to see the playground and follow its instructions.
+- Open `http://localhost:4000` to see the playground and follow its instructions.
 - Open the [Raygun console](https://app.raygun.com) matching the API key, so you can validate that things get reported.
 
 

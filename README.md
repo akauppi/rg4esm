@@ -18,7 +18,7 @@ The outcome is a client further away from plain client's API than the author wou
 ## File system
 
 ```
-- demo/       # sample web app for manually testing the package
+- playground/ # sample web app for manually testing the package
 - package/    # everything ending up in 'npm' registry, when published
 ```
 
@@ -32,10 +32,17 @@ The outcome is a client further away from plain client's API than the author wou
 
    Create a dedicated app in the Raygun console for running the demo.
 
+	Pick that key and create `playground/.env.local`:
+	
+	```
+	# you can use comments
+   VITE_RAYGUN_API_KEY=AbCD...5678
+	```
+
 <!-- Developed on:
-- macOS 12.0
-- node 17.2
-- npm 8.1
+- macOS 12.1
+- node 17.4
+- npm 8.3
 -->
 
 
@@ -46,11 +53,14 @@ $ npm install
 ```
 
 ```
-$ RAYGUN_API_KEY=... npm run dev
+$ cd playground
+$ PORT=4000 npm run dev
 ...
 ```
 
-Open [localhost:5000](http://localhost:5000) and follow the instructions to exercise the client and confirm that data gets shipped to your Raygun app.
+>Note: To view the page on a different device, start with `HOST=0.0.0.0 npm run dev`
+
+Open [localhost:4000](http://localhost:4000) and follow the instructions to exercise the client and confirm that data gets shipped to your Raygun app.
 
 
 ## Terminology

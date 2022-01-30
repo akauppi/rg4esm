@@ -1,5 +1,5 @@
 /*
-* src/errorMonitoring/dispatchError.js
+* src/errorMonitoring/sendError.js
 *
 * Dispatch an Error to Raygun; potentially waiting until online.
 *
@@ -19,16 +19,14 @@ let myDispatcher;
 /**
  * Try to ship an Error. If no network, queued for later (automatic) delivery.
  *
- * Completes as:
- *   - true if delivered on first try (heard by Raygun)
- *   - false if queued (delivery will be attempted, but no guarantees; lost e.g. if the user closes the browser).
- *
  * @param {Error} error
- * @return {Promise<boolean>}
+ * @return {Promise<boolean>} Completes as 'true' if delivered on first try; 'false' if queued.
  */
-async function dispatchError(error) {
+async function sendError(error) {
   console.log("Getting error like this:", error);
   const err_message = error.message;  // string
+
+  myDispatcher ||= genDispatcher( rgEntriesURL, "POST" );
 
   const now = new Date();
 
@@ -115,8 +113,6 @@ async function dispatchError(error) {
 
   console.debug("Prepared for dispatch:", o);
 
-  myDispatcher || (myDispatcher = genDispatcher( rgEntriesURL, "POST" ));
-
   return myDispatcher(o).then( b => {
     console.debug( b ? "delivered at first try" : "queued for later")
     return b;
@@ -124,5 +120,5 @@ async function dispatchError(error) {
 }
 
 export {
-  dispatchError
+  sendError
 }

@@ -1,7 +1,6 @@
-#node_modules
 /build
 /.svelte-kit
-/package
+#/package
 
 # Raygun API key
 /.env.local

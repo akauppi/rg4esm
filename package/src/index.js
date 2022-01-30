@@ -3,10 +3,9 @@
 *
 * Main entry point.
 */
-import { dispatchError } from './errorMonitoring'
-//import { init as initRealUserMonitoring } from './realUserMonitoring'
-
 import { setUser, dropBreadcrumb, init as initContext } from './context'
+import { sendError, init as initErrorMonitoring } from './errorMonitoring'
+import { init as initUserMonitoring } from './userMonitoring'
 
 import { fail } from './shared/fail'
 
@@ -14,47 +13,37 @@ import { fail } from './shared/fail'
 * Initialize the client.
 *
 * @public
-* @param {string} apiKey
-* @param {string} appVersion
+* @param {string} apiKey API key that defines the Raygun dashboard to get the collected data.
+* @param {string?} version
 * @param {string[]} tags
 * @param { {}|boolean } errorMonitoring
-* @param { {}|boolean } realUserMonitoring
+* @param { {}|boolean } userMonitoring
 * @return {void}
 *
 * References:
 *  - GlobalEventHandlers.onerror
 *     -> https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
 */
-function init(apiKey, { appVersion, tags = [], errorMonitoring = {}, realUserMonitoring = {} }) {
+function init(apiKey, { version, tags = [], errorMonitoring = {}, userMonitoring = {} }) {
 
-  // Convert config subset to '{...}' or 'false'
+  // Convert config to '{...}' or 'false'
   const f = (x, debugName) =>
     (x === true) ? {} :
     (x === false || typeof x === 'object') ? x :
     fail(`Bad '${debugName}' (expecting {...}|bool): ${x}`);
 
   errorMonitoring = f(errorMonitoring);
-  //realUserMonitoring = f(realUserMonitoring);
+  userMonitoring = f(userMonitoring);
 
-  initContext({apiKey, appVersion, tags});
+  initContext({apiKey, appVersion: version, tags});
 
-  if (errorMonitoring) {
-
-    window.onerror = function (message, source, lineno, colno, error) {
-      console.log("Caught:", {message, source, lineno, colno, error});
-
-      dispatchError(error).then( _ => {
-        // also throw it!?!?
-        throw error;
-      })
-    };
-  }
+  if (errorMonitoring) initErrorMonitoring(errorMonitoring);
+  if (userMonitoring) initUserMonitoring(userMonitoring);
 }
 
 export {
   init,
   setUser,
   dropBreadcrumb,
-    //
-  dispatchError as dispatchError_INTERNAL   // for playground
+  sendError
 }

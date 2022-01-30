@@ -7,10 +7,3 @@
 What does that mean?
 
 What is the "Real User Monitoring API" - compared to "Real User Monitoring" by the client?
-
-
-<!-- tbd. discuss the naming of the package
--->
-
-
-- (. ) Add these to the Google Doc

@@ -1,15 +1,17 @@
 /*
 * src/errorMonitoring/index.js
 */
-import { dispatchError } from "./dispatchError"
+import { sendError } from "./sendError"
 
-/*
-* Nothing. Placeholder
+/**
+ * @param { ("console"|"navigation"|"clicks"|"network")[] } | boolean } [autoBreadCrumbs]
 */
-function init() {
+function init({ autoBreadCrumbs }) {
+
+  // tbd.
 }
 
 export {
   init,
-  dispatchError
+  sendError
 }

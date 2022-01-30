@@ -9,12 +9,14 @@
 - for users; explains how to import and use the package
 -->
 
-A re-packaging of [`raygun4js`](https://www.npmjs.com/package/raygun4js) intended for projects that use ECMAScript Modules (ESM) natively in the browser.
+Raygun.com provider for browser-native ECMAScript Modules (ESM) web applications.
 
 
 ## Design notes
 
-The `raygun4js` API shows its age and layers (Oct 2021). This client started as a simple wrapper around it, but developed into more of a grooming exercise. The goal is to provide a **simple API** that's **fast to learn** and where things simply **work out of the box**.
+The `raygun4js` API shows its age and layers (Oct 2021). This client started as a simple wrapper around it, but developed into a re-implementation. The goal is to provide a **simple API** that's **fast to learn** and where things simply **work out of the box**.
+
+Raygun itself has [Issue 266](https://github.com/MindscapeHQ/raygun4js/issues/266) open since 2018 for supporting ESM. 
 
 This is in contrast with the pre-existing client. It's complicated and the relationship between client features and where it matters on the dashboard is not obvious (in the author's opinion, of course!).
 
@@ -31,200 +33,69 @@ In short, trying to make a client one can just "plug in" and use with one's app.
 |offline aware|yes|optional; not on by default|
 |page change observation|automatic|explicit, by calling [`rg4js('trackEvent', ...)`](https://raygun.com/documentation/language-guides/javascript/vuejs/#step-4-track-route-changes)|
 |**Differences**|
-|storing of unsent Errors|not over browser sessions `(*)`|stores in Local Storage; retrying if the site is visited again|
-|Error reporting: `Request`|does not ship; considered a server-side feature|reports certain fields|
+|Error capture|explicit `(1)`|automatic|
+|storing of unsent `Error`s|not over browser sessions `(2)`|stores in Local Storage; retrying if the site is visited again|
+|Error reporting: `Request` data field|does not ship; considered a server-side feature|ships|
 |**Abandoned**|
 |IE support|no|IE10+; Crash Reporting supports IE8+|
 |"jQuery hooks"|no|included, except in "vanilla" variant|
 
->`(*)`: There's no telling how long a gap a person might have between coming back to a web app. Therefore, no effort is taken to deliver Errors if the session is closed. Avoids shipping old errors.
+>`(1)`: With this client, you need to add a couple of lines to catch and ship the errors. This shouldn't be a large inconvenience to most apps, and provides more feeling of control.
 
-You should be able to use the client simply by reading this page and studying the [sample application](http://github.com/akauppi/raygun4js-esm). 
+>`(2)`: There's no telling how long a gap a person might have between coming back to a web app. Therefore, no effort is taken to deliver Errors if the session is closed. Avoids shipping old errors.
 
+You should be able to use the client simply by reading this page and studying the [sample application](https://github.com/akauppi/rg4esm/tree/master/playground). 
+
+<!-- tbd. do we need this? let's try not to
 For details on eg. specific Raygun options, consult the Raygun Language Guides > [JavaScript](https://raygun.com/documentation/language-guides/javascript/) page alongside this document.
-
+-->
 
 ### Relation to Raygun dashboard 
 
 Raygun sells [three offerings](https://raygun.com/pricing):
 
-- **Application Performance Monitoring**
+1. **Error Monitoring & Crash Reporting**
 
-   This is a **server side** offering, geared for tuning performance. It is not available for web apps and not interesting for this client.
-   
-- **Real User Monitoring**
+   Observing unhandled exceptions that happen on the field. These should not even arise and the Raygun pricing model aims at minimizing their numbers.
 
-   Customer sessions and information about your users' experience is under this partition.
-   
+	Helps answer the question: *"is our code stable, out there?"*.
+
+2. **Real User Monitoring**
+
+	Measuring the user experience (page load etc.) when there are no exceptions. 
+	
    - Web Core Vitals
 
-- **Error Monitoring & Crash Reporting**
-
-   Observing unhandled exceptions that happen on the field. These should of course not happen.
-
-This client has two goals with these offerings in mind:
-
-- Being clear which feature maps to which Raygun offering.
-- Improving - in gentle ways - the customer experience, kind of breaking the boundaries set forth by Raygun.
-
->Commercial product definition is always difficult. Which features should be in this package vs. the other. We blur the lines by:
->
->- adding user id to the "Error Monitoring & Crash Reporting" side as a custom data (otherwise custom data is not currently supported by this client). This allows you to see which user suffered from a particular error.
->- performance monitoring support though "Application Performance Monitoring" is not available for web apps.
->
->All of this is possible also with the plain API (we have no magic skills); it's just that we set the client up in a certain way, for you.
-
-
-
-<!-- 
-## Features / walkthrough
-
-Raygun categorizes (and prices) features in the following way. We follow this in the API.
-
-- [Error Monitoring & Crash Reporting](https://raygun.com/platform/crash-reporting)
-- [Real User Monitoring](https://raygun.com/platform/real-user-monitoring)
-- Application Performance Monitoring
-
-   >Raygun [Application Performance Monitoring](https://raygun.com/documentation/product-guides/apm/introduction/) does *server side* performance profiling, analysing which parts of the source code take most of the time. This is not available for JavaScript clients. However, the Raygun Real User Monitoring can track `performance.measure` calls as [custom timings](https://raygun.com/documentation/language-guides/javascript/real-user-monitoring/custom-timings/#track-performancemeasure-calls-as-custom-timings) and [show the measurements](https://raygun.com/documentation/product-guides/real-user-monitoring/for-web/custom-timings/) in the Real User Monitoring dashboard. We regard this as performance monitoring, in this repo.
-
-
-### Error Monitoring & Crash Reporting
-
----
-
->Error Monitoring & Crash Reporting helps answer the question: **"is our code stable, out there?"**.
-
----
-
-As a developer, you don't need to do anything to enable this. Unexpected exceptions are caught and shipped to the Raygun service, for analysis.
-
-#### Breadcrumbs
-
-Breadcrumbs are added to the reported errors. These include events that preceded the error, in order to better understand it.
-
-These events are collected automatically:
-
-- `console.{log|warn|error}` calls
-- network requests and responses
-- navigation events
-- clicks
-
-<_!-- tbd. what does "navigation events" and "clicks" mean?
---_>
-
-In addition, your code can provide custom breadcrumb data.
-
->Note: Breadcrumbs are lossy. Their number is restricted to 32 per error by the Raygun Plain client. They are not logs. They are only shipped to the Raygun service in case of errors.
-
-
-### Real User Monitoring
-
----
->Real User Monitoring answers the question: **"what is the experience like, out there?"**
-
----
-
-Real User Monitoring helps you to keep the user experience good, across all (most) users, and consistent over subsequent releases.
-
-Without this tool, it would be easy to live in a "fairy land", thinking everything works smooth - because for the browsers/use cases the developers and managers have, it does. Real User Monitoring brings Reality to the mix.
-
-Real User Monitoring is automatically enabled. You can provide more context by explicitly providing information about the logged in user (or lack thereof); see `setUser` below.
-
-
-### Performance Monitoring
-
----
-
->Performance Monitoring answers the question: **"is performance out there as we expect it to be?"**
-
----
-
->This part is sold under the "Real User Monitoring" product, but we handle it separately in this client.
-
-The difference to Real User Monitoring is that here, the developers decide which timings they are interested in, and have to explicitly add lines to the code.
-
-To use Performance Monitoring, the standard [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance) is used.
-
-Performance Monitoring requires you to add `performance.{mark|measure}` lines to your code.
-
-
-### Context
-
-Both Error Monitoring & Crash Reporting and Real User Monitoring output can be filtered by contextual information.
-
-<_!-- tbd. image. 
-
-- large box: deployment (API key)
-   - version: deployment variant
-   		- browser, user location, ...
-   		- current user
-   			- current page
-		- custom tags and data
---_>
-
-**1. API key**
-
-   Raygun recommends using different API keys for different deployments (or local development environment). This is the outermost, implicit context.
-
-**2. Version**
-
-   Version of the web app.
-
-**3. Automatically collected metadata**
-
-   This includes: 
+	Gaining understanding about your user base (location, frequency of using the app, kind of browsers etc.).
    
-   - browser type
-   - browser version
-   - geographical location (country code; state; city)
-   - operating system
+   - Sessions
+   - Users
+   - Browsers
+   - Platforms
+   - Geo
 
-**4. Current user**
+	Helps answer the questions: *"what is the experience like, out there?"*, *"who are our users?"*
 
-   Providing this information is on you. See [`setUser`](#setUser).
+3. **Application Performance Monitoring**
 
-	<_!-- tbd. How much of this is usable in RUM filtering?
-	--_>
-	
-**5. Current page**
+	This is a **server side** offering, geared for tuning performance. It is not available for web apps.
 
-	<_!-- tbd. IF WE CAN DO THIS AUTOMATICALLY, MOVE TO UNDER 3. --_>
+   This client does collect perfomance data using the [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance) and we treat it separate from Real User Monitoring - because it's answering a different question. This data is visible under Real User Monitoring in the Raygun dashboard.
 
-	>Note: We're checking if this can be gathered automatically.
-	
-   Collection of this data happens by adding a few lines in the Router. See [`trackEvent.pageView`](#trackEvent_pageView).
+	Helps answer the question: *"is our app performing as we expect?"*
 
-   <_!-- tbd. check the 2 links, above (in GitHub/npmjs.com) --_>
-	<_!-- tbd. Is 'current page' usable in RUM filtering? Docs say "URL" is. --_>
-	
-**6. Custom tags**
+### Which Raygun products to pick?
 
-   You can add tags to your application. These are strings attached to errors and can be used for filtering.
-   
-   <_!-- tbd. RG feature request. Why wouldn't tags be able to carry data? (and be filterable). E.g. "version" could be handled, this way.
-   --_>
+Start with the free free trial (14 days).
 
-<_!-- tbd. Can tags/custom data be changed, during app lifespan, or are they constant? (in this client). Write something about that? --_>
+||price (USD/month)|Use for|
+|---|---|---|
+|Crash Reporting|4|Catching failures|
+|Real User Monitoring|8|Understanding your users; performance monitoring|
 
-<_!-- not revealed; it's only for errors; is there a use case??
-**7. Custom data**
+No need for APM - you'll see performance figures as part of the Real User Monitoring offering.
 
-   Custom data are added to reported errors. They are **not for filtering** and not available on the Real User Monitoring side.
-   
-   *tbd. Write some use examples*
-   
-   <_!-- tbd. what types?
-   -
-   tbd. Should we allow changing custom data, during a user session?
-   --_>
---_>
 
-   Note: Raygun plain client automatically adds certain tags:
-   
-|tag|when|
-|---|---|
-|`UnhandledPromiseRejection`|Rejected promise|
--->
 
 ## Using in your project
 
@@ -236,24 +107,27 @@ $ npm install rg4esm
 import { init } from "rg4esm"
 ```
 
->The package is only available as an ES module. Your build system must provide a suitable resolver. See the module's [GitHub repo](http://github.com/akauppi/raygun4js-esm) for a sample.
+The package is only available as an ES module. Your build system must provide a suitable resolver.
+
+>🐢 If you wish to use this client in a bundler-based web app, please raise an Issue or provide a PR. The author is solely interested in pure ESM browser apps, but it doesn't mean the client shouldn't support both. But you'll be in for some responsibilities.
 
 
-## Functionality
+## APIs
 
 The APIs are divided in following categories:
 
 ||function|comment|
 |---|---|---|
-|Initialization|`init`|Call once|
-|Setting&nbsp;the&nbsp;context|`setUser`|Call when the user changes|
-||`customBreadcrumb`|Add custom content to breadcrumbs (trail potentially leading to an error), in addition to those automatically collected|
+|Initialization|`init`|Call once; provides your API key and non-changing context|
+|Setting&nbsp;dynamic&nbsp;context|`setUser`|Call when the user logs in/out|
+||`customBreadcrumb`|Add custom content to breadcrumbs, in addition to those automatically collected|
+|Error reporting|`sendError`|Report an error situation to Raygun service|
 |Offline&nbsp;awareness|&dash;||
 
 
 ### Initialization
 
-Since most of the functionality is on by default, initialization really is the most important part of the API - maybe the only thing you need to do.
+In initialization, you decide which Raygun dashboard the data is to be collected to, steer the behaviour of Error Monitoring and Real User Monitoring ("rum" in Raygun docs). You can also provide static context about the application (version and custom tags).
 
 ```
 import { init } from "rg4esm"
@@ -261,24 +135,26 @@ import { init } from "rg4esm"
 
 ```
 init( 
-  apiKey: string, 
+  string,   // API key
   {
-    version: string,
-    tags: Array of string,
+    version?: string,
+    tags?: Array of string,
 
-    error: boolean | {
-      collectBreadcrumbs: { "console"|"navigation"|"clicks"|"network": boolean } | boolean
+    errorMonitoring?: boolean | {
+      autoBreadcrumbs?: { "console"|"navigation"|"clicks"|"network": boolean } | boolean
     }
 
-    rum: boolean | {
-      sessionExpiresIn: /\d+\s*(?:ms|s|min)/,   // 'pulseMaxVirtualPageDuration'
-      ignoreUrlCasing: boolean,		                // 'pulseIgnoreUrlCasing'
+    userMonitoring?: boolean | {
+      sessionExpiresIn?: "{x} s|min",   // plain client 'pulseMaxVirtualPageDuration'
+      ignoreUrlCasing?: boolean,        // plain client 'pulseIgnoreUrlCasing'
     }
-  }?
+  }
 )
 ```
 
-`apiKey` validates your client's authority to push anything to Raygun but also identifies the *"app"* (a data collection) within Raygun dashboards. In a way, it is the largest context.
+>Raygun note: Plain client uses terms "pulse" and "rum" for Real User Monitoring.
+
+API key validates your client's authority to push anything to Raygun but also identifies the *"app"* (a data collection) within Raygun dashboards. In a way, it is the largest context.
 
 Configuration is divided between `error` (Error Monitoring & Crash Reporting) and `rum` (Real User Monitoring). If you don't have one of those offerings, set the value to `false`. By default, they are both enabled.
 

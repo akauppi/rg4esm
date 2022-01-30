@@ -1,17 +1,10 @@
 {
   "name": "@local/root",
-  "description": "Raygun JS client for ESM-capable browsers (build and demo)",
+  "description": "Raygun JS client for ESM-capable browsers",
   "license": "MIT",
   "type": "module",
   "private": true,
-  "engines": {
-    "node": ">= 16"
-  },
   "scripts": {
-    "build": "npm --prefix package run build",
-    "dev": "npm --prefix playground run dev",
-    "//#later test": "NODE_OPTIONS=--experimental-vm-modules jest --config test/jest.config.js --verbose --detectOpenHandles --all",
-    "-- ": "",
-    "preinstall": "npm --prefix package install && npm --prefix demo install"
+    "preinstall": "npm --prefix package install && npm --prefix playground install"
   }
 }

@@ -1,7 +1,7 @@
 /*
-* srf/tools/genDispatcher.js
+* src/tools/genDispatcher.js
 *
-* Creates an object for delivering data to Raygun APIs. Takes care of eventual delivery (unless the browser is closed).
+* Creates an object for delivering data to Raygun APIs.
 *
 * References:
 *   - "Using fetch" (MDN)
@@ -11,13 +11,8 @@ import { getApiKey } from '../context'
 import { fail } from './fail'
 
 const initialCooldownMS = 500;
-const maxRetryMs = 999999999;     // practically - don't give up (~270h)
-
-/**
-* @type {integer[]} Cooldowns in ms, progressively increasing.
-*/
-const cooldownMS = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144].map( x => x * initialCooldownMS );
-  // (fibo without initial 1)
+const maxCooldownMS = 30 * 1000;
+const maxRetryMs = Number.MAX_SAFE_INTEGER;     // practically don't give up
 
 /**
  * Try to make a network request. If no network, queued for later (automatic) delivery.
@@ -36,39 +31,62 @@ function genDispatcher(url, method = 'POST') {
   const t0 = Date.now();  // ms
 
   /**
-   * @param {object} bodyObj
+   * @param {string} body Body, after 'JSON.stringify'
    * @param {number} depth 0..n; number of tries already taken
    * @return {Promise<boolean>} true if first call went through; false if needed to wait
    */
-  return async function thisF (bodyObj, depth = 0) {
+  async function thisF (body, depth = 0) {
 
     const resp = await fetch(url, {
       method,
+      mode: 'cors',   // "cors"|"no-cors"|"*cors"|"same-origin"     <-- tbd. explain
       headers: {
+        'Content-Type': 'application/json',
         'X-ApiKey': apiKey
-      }
+      },
+      body
     })
     .catch(err => {  // "reject on network failure or if anything prevented the request from completing"
 
       console.log("!!!", {err});
-      debugger;
 
-      const delay = cooldownMS[depth] || fail(`Internal: not enough wait stuff.`);
+      const delay = cooldownMS(depth);
 
       waitMS(delay).then( _ => {
         const dt = Date.now() - t0;   // ms since first try
         (dt < maxRetryMs) || fail(`Waited enough offline (giving up): ${dt/1000} > ${maxRetryMs/1000}`);
 
-        return thisF(bodyObj, depth+1)
+        return thisF(body, depth+1)
           .then(_ => false);
       })
     });
 
-    // tbd. analyze 'resp'
-    console.log("resp", {resp})
-    debugger;
+    // Extract also body for debugging.
+    //
+    const respBody = await resp.text();
 
-    return true;
+    // resp:
+    //    { ok: false, status: 413 }    // payload too large
+    //
+    // tbd. analyze 'resp'
+    console.log("!!!", {resp, body: respBody})
+
+    if (!resp.ok) {
+      console.debug("Call failure details", { ...resp, body: respBody })
+      throw new Error(`Failed to send: status=${ resp.status }`)
+    }
+
+    return true;    // delivered
+  }
+
+  /**
+   * Wrapper so that JSON conversion only happens once.
+   *
+   * @param {object} body
+   * @return {Promise<boolean>} true if first call went through; false if needed to wait
+   */
+  return async (body) => {
+    return thisF( JSON.stringify(body) );
   }
 }
 
@@ -79,6 +97,27 @@ function genDispatcher(url, method = 'POST') {
 const waitMS = (ms) => new Promise( res => {
   setTimeout(res, ms);
 });
+
+/**
+ * Provide a waiting time for 'depth' (0..)
+ *
+ * @param {number} depth 0..n
+ * @return {number} ms to wait before next attempt (progressively increasing, up to a limit)
+ */
+function cooldownMS(depth) {
+
+  const ms = fibonacci(depth) * initialCooldownMS;
+  return Math.max( ms, maxCooldownMS );
+}
+
+const arr = [1,1];   // fibonacci (seed)
+
+function fibonacci(n) {
+  if (!arr[n]) {
+    arr[n] = fibonacci(n-1) + fibonacci(n-2);
+  }
+  return arr[n];
+}
 
 export {
   genDispatcher

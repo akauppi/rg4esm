@@ -1,7 +1,7 @@
 /*
 * Fashioned according to https://github.com/mvasigh/sveltekit-mdsvex-blog
 */
-import adapter from '@sveltejs/adapter-static'
+//import adapter from '@sveltejs/adapter-static'
 import { mdsvex } from "mdsvex"
 
 const extensions = [".smd"];
@@ -20,7 +20,7 @@ const o = {
   preprocess: [ mdsvex(o2) ],
   kit: {
     target: '#svelte',  // hydrate the <div id="svelte"> element in src/app.html
-    adapter: adapter(),
+    //adapter: adapter(),
     prerender: {
       onError: 'continue'   // tbd. explain??
     }

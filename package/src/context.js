@@ -6,9 +6,8 @@
 import { fail } from './shared/fail'
 
 // 'undefined' when the user is unknown (not set, yet)
-// 'null' for a guest user. #tbd
 //
-/** @type User|null|undefined */    let currentUser;
+/** @type User|undefined */    let currentUser;
 
 /** @type Breadcrumb[] */           const currentBreadcrumbs = [];
 
@@ -18,14 +17,14 @@ import { fail } from './shared/fail'
 
 //--- User ---
 
-/** @param {User} user
+/** @param {User|undefined} user
   @return {void}
 */
 function setUser(user) {
   currentUser = user;
 }
 
-/** @return {User|undefined|null}
+/** @return {User|undefined}
 */
 function getCurrentUser() {
   return currentUser;
